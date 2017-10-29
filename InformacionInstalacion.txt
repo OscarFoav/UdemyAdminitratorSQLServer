@@ -1,0 +1,8 @@
+O123s456a789$%&_
+
+dism /online /enable-feature /featurename:NetFx3 /All /Source:D:\sources\sxs /LimitAccess
+
+alter database test set online;
+
+dbcc LogInfo;
+
