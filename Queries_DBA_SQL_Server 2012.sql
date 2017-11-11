@@ -1,5 +1,6 @@
 --- Queries curso DBA SQL Server 2012
 
+--- Part 1
 
 http://www.vmware.com/products/workstation/workstation-evaluation 
 https://msdn.microsoft.com/enus/windowsserver2012r2.aspx 
@@ -2148,14 +2149,2175 @@ GO
 
 
 ----------------------------------------------------------------------------
+
+--- Part 2
+
+For more Information and new courses visit us at:
+Rafacademy.com
+
+
+Sites to download
+
+SQL Server 2014
+http://www.microsoft.com/en-us/evalcenter/evaluate-sql-server-2014
+
+Red Gate Software:
+https://www.red-gate.com/products/
+
+
+
+
 ----------------------------------------------------------------------------
+
+
+Use SQL2
+Go
+
+
+
+Create Table People
+(
+PeopleID int Identity (1,1),
+Fname varchar (20),
+Lname varchar (20),
+Address1 varchar (100),
+City varchar (50),
+State varchar (50),
+Zip varchar (10),
+Country varchar (50),
+Phone varchar (20))
+
+
+
+--Verify data inserts
+
+select COUNT (*) from People
+
+--View database size
+
+sp_helpdb  [SQL2]
+
+
+select top 100 * from People
+
+
+BACKUP DATABASE [SQL2] 
+TO  DISK = N'C:\Program Files\Microsoft SQL Server\MSSQL12.SQL2014\MSSQL\Backup\SQL2.bak' 
+WITH NOFORMAT, 
+NOINIT, 
+NAME = N'SQL2-Full Database Backup', 
+SKIP, NOREWIND, NOUNLOAD,  STATS = 10
+GO
+
+
 ----------------------------------------------------------------------------
+
+
+What Is an Index?
+•	An index can be best described as a pointer to data in a table. An index in a database is very similar to an index in the back of a book or the phone book.  Indexes are created on the table or the view
+Purpose of index
+•	The purpose of an index is to retrieve data from a table efficiently and fast
+Types of indexes
+•	Clustered Indexes
+Clustered indexes sort the data rows in the table or view based on their key values, as such there can be only one clustered index per table. When a table does not have an index, it is referred to as a heap.  When you create a clustered index, it does not require any additional disk space
+•	Non-clustered Indexes
+A Nonclustered index have a structure separate from the data rows, much like the index in back of a book; and as such does require disk space, as it’s a separate object. A nonclustered index contains a pointer to the data row that contains the key value. For a heap, a row locator is a pointer to the row. For a clustered table, the row locator is the clustered index key. 
+•	Composite Indexes
+
+
+	A composite index is an index on two or more columns of a table. A composite index can be created both on a clustered and non clustered index. Note, when creating a composite index the order of columns in the index is important for performance. Columns that will always mentioned in a query should be placed first. 
+
+
+ Other less used indexes (depends)
+
+•	Covering Indexes
+•	Full-text
+•	Filtered Indexes
+•	Column-based Indexes
+•	Spatial
+•	XML
+
+
+Creating indexes using TSQL and GUI
+
+
+CREATE INDEX index_name
+ON table_name (column_name)
+
+CREATE UNIQUE INDEX index_name
+ON table_name (column_name)
+
+CREATE NONCLUSTERED INDEX [indexname] 
+ON table_or_view_name ([columnname] ASC|DESC) 
+
+
+DROP INDEX index_name ON table_name
+
+
+--CREATE CLUSTERED INDEX index_name
+--ON table_name (column_name)
+
+
+
+EXAMPLE OF INDEXES AND CLUSTERED INDEX
+
+--Insert 1000 records from  RedGate app
+  
+USE [SQL2]
+GO
+
+CREATE TABLE [dbo].[PhoneBook](
+	[PhoneBookID] [int] NULL,
+	[lname] [varchar](50) NULL,
+	[fname] [varchar](50) NULL,
+	[phone] [varchar](50) NULL
+) ON [PRIMARY]
+
+GO
+
+--Insert 1000 records from RedGate app
+
+--View the 1000 records. Notice that the last name is not in any particular order
+ 
+SELECT * FROM PHONEBOOK
+
+--Insert record into phonebook table and notice the row is inserted after 1000 rows, as there is no index and the Lname is in no particular order
+
+Insert into PHONEBOOK
+values (1001,'Abba','Sara','555-1212')
+
+SELECT * FROM PHONEBOOK
+
+--repeat with another record
+
+Insert into PHONEBOOK
+values (1002,'Turner','Mike','805-555-1212')
+
+SELECT * FROM PHONEBOOK
+
+
+--Create a clustered index on table phonebook and column Lname so that the last name is alphabetized (its sorted by the clustered index created)
+
+USE [SQL2]
+GO
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_Lname] --<< Index name with prefix, table name and column name (convention for clarity)
+ON PhoneBook(Lname ASC)                      --<< Table and column name
+GO
+
+
+--View the 1000 records. This time notice that the last name IS in order by the last!
+ 
+SELECT * FROM PHONEBOOK
+
+--Now with the clusttered index in place, if we insert a record, it will automatically be inserted in the sorted order.
+
+Insert into PHONEBOOK
+values (1003,'Briggham','Johm','777-555-1212')
+
+SELECT * FROM PHONEBOOK
+
+USE [SQL2]
+GO
+Drop table PHONEBOOK
+
+
+NON CLUSTERED INDEX SCRIPT
+
+
+
+--View data with clustered index (lname column is still sorted)
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+-- Create another clustered index causes an issue (on fname) because you can only have one clustered index
+
+USE [SQL2]
+GO
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_phonebookid]
+ON PhoneBook(phonebookid ASC)
+
+
+Drop index [PhoneBook].[Idx_PhoneBook_lname]
+
+--Can create an single clustered index that has multiple columns
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_Fname_Lname]
+ON [dbo].[PhoneBook](lname ASC,fname ASC) --<< multiple columns
+
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+--Example of non clustered index
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NC_Ind_PhoneBook_ fname]  --<< notice that after creation of a non clustered index, the data is not sorted
+ON PhoneBook(fname ASC)
+
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+--Can create multiple non clustered index (On lname)
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NC_Ind_PhoneBook_phone] --<< second creation of an index and phone
+ON PhoneBook(phone ASC)
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+
+
 ----------------------------------------------------------------------------
+
+
+
+--View data with clustered index (lname column is still sorted)
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+-- Create another clustered index causes an issue (on fname) because you can only have one clustered index
+
+USE [SQL2]
+GO
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_phonebookid]
+ON PhoneBook(phonebookid ASC)
+
+
+Drop index [PhoneBook].[Idx_PhoneBook_lname]
+
+--Can create an single clustered index that has multiple columns
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_Fname_Lname]
+ON [dbo].[PhoneBook](lname ASC,fname ASC) --<< multiple columns
+
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+--Example of non clustered index
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NC_Ind_PhoneBook_ fname]  --<< notice that after creation of a non clustered index, the data is not sorted
+ON PhoneBook(fname ASC)
+
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+--Can create multiple non clustered index (On lname)
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NC_Ind_PhoneBook_phone] --<< second creation of an index and phone
+ON PhoneBook(phone ASC)
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
 ----------------------------------------------------------------------------
+
+--Find all created indexes
+
+Use AdventureWorks2014
+go
+
+sp_helpindex '[HumanResources].[Department]'  --<< sproc followed by table name
+
+
+--Create a composite index (two or more columns are specified) on a non clustered index
+
+USE [SQL2]
+Go
+
+
+CREATE NONCLUSTERED INDEX [NC_Ind_People_Lname_Fname] 
+ON [dbo].[People]
+(Lname ASC,Fname ASC) --<< Note the order of the columns specified is important.  place the column in order of the query's where clause order
+
+
+sp_helpindex people  --<< sproc followed by table name
+
+
+
+***********************
+
+
+
+--Find all created indexes (two ways: GUI or sproc)
+
+Use AdventureWorks2014
+go
+
+sp_helpindex '[HumanResources].[Department]'  --<< sproc followed by table name
+
+
+--Create a composite index (two or more columns are specified) on a non clustered index
+
+USE [SQL2]
+Go
+
+
+CREATE NONCLUSTERED INDEX [NC_Ind_People_Lname_Fname] --<< the more columns you chose to index, the longer it will take to create the index!!
+ON [dbo].[People]
+(Lname ASC,Fname ASC) --<< Note the order of the columns specified is important.  place the column in order of the query's where clause order
+
+
+--4 mins
+
+
+USE [SQL2]
+Go
+
+sp_helpindex people  --<< sproc followed by table name
+
+
+USE [SQL2]
+Go
+
+DROP INDEX [NC_Ind_People_Lname_Fname] ON [dbo].[People]
+GO
+
+
+
+--Example: Running a query with out an index looking for the last name 'Franklin600'
+--as there is no index on the lname, the query will have to start from the first row and sequentially go through 
+--all the 50 million rows until it finds the lname Franklin600!!!  (this is called a table scan and very poor for performance)
+
+
+USE [SQL2]
+GO
+
+SELECT * 
+  FROM [dbo].[People]
+  where Lname = 'Franklin600'
+GO
+--that took 35 seconds!!! 12 rows (before  creating of an index on lname)
+
+
+--Create an index on lname (to create an index on lname column, the data has to be sorted and has pointers to the actual data in a table)
+--the creatinon of an index can take along time because it is 'copying' the the column lname seperately with pointers to data!!
+--any time you update the table people with and insert, update or delete, the index on that column has to be updated ALSO. 
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NC_Ind_People_Lname] 
+ON [dbo].[People]([Lname] ASC)
+--2:45 mins
+
+
+--Run select statment after the index creating
+
+
+USE [SQL2]
+GO
+
+SELECT * 
+  FROM [dbo].[People]
+ --where Lname = 'Franklin600'
+ where Lname = 'Everett652'
+GO
+--that less than a second!!! 12 rows (after the creating of an index on lname)
+
+
+
+
+
 ----------------------------------------------------------------------------
+
+USE [SQL2]
+GO
+
+--create a table and use the SQL Data Generator to insert 1 million rows
+
+--CREATE TABLE [dbo].[People2](
+--	[Fname] [varchar](20) NULL,
+--	[Lname] [varchar](20) NULL,
+--	[Phone] [varchar](20) NULL
+--) ON [PRIMARY]
+
+--GO
+
+--Use SQL Data Generator to poulate 10 million rows
+--select count (*) from people2
+--15,000,000 rows
+
+--When to create/use and not to use an index.  Find the phone number for lname Lambert   --<< don't use
+
+SELECT TOP 10 [Fname]
+      ,[Lname]
+      ,[Phone]
+  FROM [SQL2].[dbo].[People2]
+
+
+--When to create/use and not to use an index.  Find the phone number for lname Conrad --<< don't use
+
+  SELECT TOP 100 [Fname]
+      ,[Lname]
+      ,[Phone]
+  FROM [SQL2].[dbo].[People2]
+
+ --When to create/use and not to use an index.  Find the phone number for lname Sanders  --<< don't use
+
+
+SELECT TOP 1000 [Fname]
+      ,[Lname]
+      ,[Phone]
+  FROM [SQL2].[dbo].[People2]
+
+   --When to create/use and not to use an index.  Find the phone number for lname Robertson  --<<  use
+
+  SELECT  [Fname] 
+      ,[Lname]
+      ,[Phone]
+  FROM [SQL2].[dbo].[People2]
+  Where lname = 'Robertson'
+
+
+  -- So when should we create an index?  The first answer to this is when there is large amount of data (but other considrations)
+
+  --If we create an indexm how does the clustered index help us retrieve last name data faster?  bu sorting the lname column
+  --you alphabatize the lname and as such, if you encounter two SAME lname, they will be next to each other.
+
+
+  --Create a clustered index on lname to sort the data.  This wil improve retrival of lname data
+
+USE [SQL2]
+GO
+
+CREATE CLUSTERED INDEX [Ind_People2_Lname] 
+ON [People2]([Lname] ASC)
+
+
+
+  SELECT   [Fname] 
+      ,[Lname]
+      ,[Phone]
+  FROM [SQL2].[dbo].[People2]
+  Where lname = 'Robertson'
+
+  
 ----------------------------------------------------------------------------
+
+
+What Is an Index?
+•	An index can be best described as a pointer to data in a table. An index in a database is very similar to an index in the back of a book or the phone book.  Indexes are created on the table or the view
+Purpose of index
+•	The purpose of an index is to retrieve data from a table efficiently and fast
+Types of indexes
+•	Clustered Indexes
+Clustered indexes sort the data rows in the table or view based on their key values, as such there can be only one clustered index per table. When a table does not have an index, it is referred to as a heap.  When you create a clustered index, it does not require any additional disk space
+•	Non-clustered Indexes
+A Nonclustered index have a structure separate from the data rows, much like the index in back of a book; and as such does require disk space, as it’s a separate object. A nonclustered index contains a pointer to the data row that contains the key value. For a heap, a row locator is a pointer to the row. For a clustered table, the row locator is the clustered index key. 
+•	Composite Indexes
+
+
+	A composite index is an index on two or more columns of a table. You should consider performance when creating a composite index because the order of columns in the index has a measurable effect on data retrieval speed. Generally, the most restrictive value should be placed first for optimum performance. However, the columns that will always be specified should be placed first. 
+
+
+ Other less used indexes (depends)
+
+•	Covering Indexes
+•	Full-text
+•	Filtered Indexes
+•	Column-based Indexes
+•	Spatial
+•	XML
+
+
+Creating indexes using TSQL and GUI
+
+
+CREATE INDEX index_name
+ON table_name (column_name)
+
+CREATE UNIQUE INDEX index_name
+ON table_name (column_name)
+
+CREATE NONCLUSTERED INDEX [indexname] 
+ON table_or_view_name ([columnname] ASC|DESC) 
+
+
+DROP INDEX index_name ON table_name
+
+
+--CREATE CLUSTERED INDEX index_name
+--ON table_name (column_name)
+
+
+
+EXAMPLE OF INDEXES AND CLUSTERED INDEX
+
+--Insert 1000 records from  RedGate app
+  
+USE [SQL2]
+GO
+
+CREATE TABLE [dbo].[PhoneBook](
+	[PhoneBookID] [int] NULL,
+	[lname] [varchar](50) NULL,
+	[fname] [varchar](50) NULL,
+	[phone] [varchar](50) NULL
+) ON [PRIMARY]
+
+GO
+
+--Insert 1000 records from RedGate app
+
+--View the 1000 records. Notice that the last name is not in any particular order
+ 
+SELECT * FROM PHONEBOOK
+
+--Insert record into phonebook table and notice the row is inserted after 1000 rows, as there is no index and the Lname is in no particular order
+
+Insert into PHONEBOOK
+values (1001,'Abba','Sara','555-1212')
+
+SELECT * FROM PHONEBOOK
+
+--repeat with another record
+
+Insert into PHONEBOOK
+values (1002,'Turner','Mike','805-555-1212')
+
+SELECT * FROM PHONEBOOK
+
+
+--Create a clustered index on table phonebook and column Lname so that the last name is alphabetized (its sorted by the clustered index created)
+
+USE [SQL2]
+GO
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_Lname] --<< Index name with prefix, table name and column name (convention for clarity)
+ON PhoneBook(Lname ASC)                      --<< Table and column name
+GO
+
+
+--View the 1000 records. This time notice that the last name IS in order by the last!
+ 
+SELECT * FROM PHONEBOOK
+
+--Now with the clusttered index in place, if we insert a record, it will automatically be inserted in the sorted order.
+
+Insert into PHONEBOOK
+values (1003,'Briggham','Johm','777-555-1212')
+
+SELECT * FROM PHONEBOOK
+
+USE [SQL2]
+GO
+Drop table PHONEBOOK
+
+
+NON CLUSTERED INDEX SCRIPT
+
+
+
+--View data with clustered index (lname column is still sorted)
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+-- Create another clustered index causes an issue (on fname) because you can only have one clustered index
+
+USE [SQL2]
+GO
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_phonebookid]
+ON PhoneBook(phonebookid ASC)
+
+
+Drop index [PhoneBook].[Idx_PhoneBook_lname]
+
+--Can create an single clustered index that has multiple columns
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_Fname_Lname]
+ON [dbo].[PhoneBook](lname ASC,fname ASC) --<< multiple columns
+
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+--Example of non clustered index
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NC_Ind_PhoneBook_ fname]  --<< notice that after creation of a non clustered index, the data is not sorted
+ON PhoneBook(fname ASC)
+
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+--Can create multiple non clustered index (On lname)
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NC_Ind_PhoneBook_phone] --<< second creation of an index and phone
+ON PhoneBook(phone ASC)
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+
+
+
+
+
+
+
+
+
+
+
+When should indexes be considered and 
+What factors influence creation of indexes?
+
+When the table is large in size (row count)
+•	Contains millions if not 100’s of millions rows
+When the table is used frequently
+•	The table is used more than just infrequently
+When the columns are frequently used in the WHERE clause 
+•	The query against the database has where clause
+Columns that are frequently referenced in the ORDER BY and GROUP BY clauses
+•	If you’re sorting data, then its beneficial
+Indexes should be created on columns with a high number of unique values
+•	Create indexes on columns that are all virtually unique such as integer
+Create a single column index on single where clause query
+•	If the where clause has a single column then create a single index
+Create a multiple column index on multiple where clause query
+•	If the where clause has multiple columns then create multiple index
+Build index on columns of integer type
+•	Integers take less space to store, which means the query will be faster
+
+The order of the composite index matters, so place the column in the index as with the where clause
+•	Use the column with the lowest cardinality first, and the column with the highest cardinality last, which means keep the unique column first and less unique column last (select distinct col1 from table)
+Testing is the key in determining what will work for your environment. Play with different combinations of indexes, no indexes, single-column indexes, and composite indexes. 
+When Should Indexes Be Avoided?
+
+Indexes should not be used on small tables
+•	Smaller tables do better with a table scan
+Indexes should not be used on columns that contain a high number of NULL values.
+•	Maintenance on the index can become excessive
+Don’t use an index that will return a high percentage of data 
+•	few distinct values such as gender
+Creating indexes come with a cost
+•	Indexes take up disk space 
+•	INSERT, UPDATE, and DELETE operations become slower, since the database system need to update the values in the table, and it also needs to update the indexes
+
+
+************************
+
+
+/*
+
+Note: table people in db SQL2 has beeen updated to contain 100,000,000 million rows using SQL Data Generator
+
+Select count (*) from people  --100000000 rows
+
+Use the where clause for lname (single column index would be beneficial
+if the table is used frequently, otherwise do not create an index
+
+*/
+
+--Using the WHERE clause without an index (1 min 10 sesc)
+--click on icon to display estimated execution plan (shows that a table scan will be executed and missing non clustered index is suggested on lname and others columns)
+--the display estimated execution plan dose not execute the query, but shows the plan if executed!!
+
+USE [SQL2]
+GO
+
+SELECT [PeopleID]  --<< note while i am using all the columns, in a production server, use only columns that are needed
+      ,[Fname]
+      ,[Lname]
+      ,[Address1]
+      ,[City]
+      ,[State]
+      ,[Zip]
+      ,[Country]
+      ,[Phone]
+  FROM [dbo].[People]
+  WHERE Lname = 'Spence'
+
+GO
+
+--Using the WHERE clause without a non clustered index on lname  (1 min 10 sesc)
+
+--Before runnng the script, create the 'suggeted' non clustered index
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [<Name of Missing Index, sysname,>]
+ON [dbo].[People] ([Lname])
+--INCLUDE ([PeopleID],[Fname],[Address1],[City],[State],[Zip],[Country],[Phone])--<< INCLUDE MEANS INCLUDE NON KEY COLUMNS. THIS COVERS MORE QUERIES
+GO
+
+--5 MIN 30 SEC
+
+
+--RERUN THE SCRIPT FOR FINDING ALL DATA FOR LNAME SPENCE.  REMEMBER, IN A PRODUCTION SERVER, DONT USE ALL THE FIELDS, ONLY THE ONES THAT ARE NEEDED.
+
+USE [SQL2]
+GO
+
+SELECT  [PeopleID]
+      ,[Fname]
+      ,[Lname]
+      ,[Address1]
+      ,[City]
+      ,[State]
+      ,[Zip]
+      ,[Country]
+      ,[Phone]
+  FROM [dbo].[People]
+  --WHERE Lname = 'Spence'
+  WHERE Lname =  'Zuniga'
+GO
+
+
+--1st run = 2 min 15 sec
+--2nd run = 10 sec  (becasue it is cached)
+
+
+--without all columns
+
+USE [SQL2]
+GO
+
+SELECT  [PeopleID]
+      ,[Fname]
+      ,[Lname]
+  FROM [dbo].[People]
+  --HERE Lname = 'Spence'
+  WHERE Lname =  'Zuniga'
+GO
+
+--2 sec
+
+
+
 ----------------------------------------------------------------------------
+
+
+What Is an Index?
+•	An index can be best described as a pointer to data in a table. An index in a database is very similar to an index in the back of a book or the phone book.  Indexes are created on the table or the view
+Purpose of index
+•	The purpose of an index is to retrieve data from a table efficiently and fast
+Types of indexes
+•	Clustered Indexes
+Clustered indexes sort the data rows in the table or view based on their key values, as such there can be only one clustered index per table. When a table does not have an index, it is referred to as a heap.  When you create a clustered index, it does not require any additional disk space
+•	Non-clustered Indexes
+A Nonclustered index have a structure separate from the data rows, much like the index in back of a book; and as such does require disk space, as it’s a separate object. A nonclustered index contains a pointer to the data row that contains the key value. For a heap, a row locator is a pointer to the row. For a clustered table, the row locator is the clustered index key. 
+•	Composite Indexes
+
+
+	A composite index is an index on two or more columns of a table. A composite index can be created both on a clustered and non clustered index. Note, when creating a composite index the order of columns in the index is important for performance. Columns that will always mentioned in a query should be placed first. 
+
+
+ Other less used indexes (depends)
+
+•	Covering Indexes
+•	Full-text
+•	Filtered Indexes
+•	Column-based Indexes
+•	Spatial
+•	XML
+
+
+Creating indexes using TSQL and GUI
+
+
+CREATE INDEX index_name
+ON table_name (column_name)
+
+CREATE UNIQUE INDEX index_name
+ON table_name (column_name)
+
+CREATE NONCLUSTERED INDEX [indexname] 
+ON table_or_view_name ([columnname] ASC|DESC) 
+
+
+DROP INDEX index_name ON table_name
+
+
+--CREATE CLUSTERED INDEX index_name
+--ON table_name (column_name)
+
+
+
+EXAMPLE OF INDEXES AND CLUSTERED INDEX
+
+--Insert 1000 records from  RedGate app
+  
+USE [SQL2]
+GO
+
+CREATE TABLE [dbo].[PhoneBook](
+	[PhoneBookID] [int] NULL,
+	[lname] [varchar](50) NULL,
+	[fname] [varchar](50) NULL,
+	[phone] [varchar](50) NULL
+) ON [PRIMARY]
+
+GO
+
+--Insert 1000 records from RedGate app
+
+--View the 1000 records. Notice that the last name is not in any particular order
+ 
+SELECT * FROM PHONEBOOK
+
+--Insert record into phonebook table and notice the row is inserted after 1000 rows, as there is no index and the Lname is in no particular order
+
+Insert into PHONEBOOK
+values (1001,'Abba','Sara','555-1212')
+
+SELECT * FROM PHONEBOOK
+
+--repeat with another record
+
+Insert into PHONEBOOK
+values (1002,'Turner','Mike','805-555-1212')
+
+SELECT * FROM PHONEBOOK
+
+
+--Create a clustered index on table phonebook and column Lname so that the last name is alphabetized (its sorted by the clustered index created)
+
+USE [SQL2]
+GO
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_Lname] --<< Index name with prefix, table name and column name (convention for clarity)
+ON PhoneBook(Lname ASC)                      --<< Table and column name
+GO
+
+
+--View the 1000 records. This time notice that the last name IS in order by the last!
+ 
+SELECT * FROM PHONEBOOK
+
+--Now with the clusttered index in place, if we insert a record, it will automatically be inserted in the sorted order.
+
+Insert into PHONEBOOK
+values (1003,'Briggham','Johm','777-555-1212')
+
+SELECT * FROM PHONEBOOK
+
+USE [SQL2]
+GO
+Drop table PHONEBOOK
+
+
+NON CLUSTERED INDEX SCRIPT
+
+
+
+--View data with clustered index (lname column is still sorted)
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+-- Create another clustered index causes an issue (on fname) because you can only have one clustered index
+
+USE [SQL2]
+GO
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_phonebookid]
+ON PhoneBook(phonebookid ASC)
+
+
+Drop index [PhoneBook].[Idx_PhoneBook_lname]
+
+--Can create an single clustered index that has multiple columns
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_Fname_Lname]
+ON [dbo].[PhoneBook](lname ASC,fname ASC) --<< multiple columns
+
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+--Example of non clustered index
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NC_Ind_PhoneBook_ fname]  --<< notice that after creation of a non clustered index, the data is not sorted
+ON PhoneBook(fname ASC)
+
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+--Can create multiple non clustered index (On lname)
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NC_Ind_PhoneBook_phone] --<< second creation of an index and phone
+ON PhoneBook(phone ASC)
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+
+**********************************************
+
+--Example of creating a clustered index using TSQL 
+
+--CREATE CLUSTERED INDEX index_name
+--ON table_name (column_name)
+
+
+--Insert 1000 records from  RedGate app
+  
+USE [SQL2]
+GO
+
+CREATE TABLE [dbo].[PhoneBook](
+	[PhoneBookID] [int] NULL,
+	[lname] [varchar](50) NULL,
+	[fname] [varchar](50) NULL,
+	[phone] [varchar](50) NULL
+) ON [PRIMARY]
+
+GO
+
+--Insert 1000 records from RedGate app
+
+--View the 1000 records. Notice that the last name is not in any particular order
+ 
+SELECT * FROM PHONEBOOK
+
+--Insert record into phonebook table and notice the row is inserted after 1000 rows, as there is no index and the Lname is in no particular order
+
+Insert into PHONEBOOK
+values (1001,'Abba','Sara','555-1212')
+
+SELECT * FROM PHONEBOOK
+
+--repeat with another record
+
+Insert into PHONEBOOK
+values (1002,'Turner','Mike','805-555-1212')
+
+SELECT * FROM PHONEBOOK
+
+
+--Create a clustered index on table phonebook and column Lname so that the last name is alphabetized (its sorted by the clustered index created)
+
+USE [SQL2]
+GO
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_Lname] --<< Index name with prefix, table name and column name (convention for clarity)
+ON PhoneBook(Lname ASC)                      --<< Table and column name
+GO
+
+
+--View the 1000 records. This time notice that the last name IS in order by the last!
+ 
+SELECT * FROM PHONEBOOK
+
+--Now with the clusttered index in place, if we insert a record, it will automatically be inserted in the sorted order.
+
+Insert into PHONEBOOK
+values (1003,'Briggham','Johm','777-555-1212')
+
+SELECT * FROM PHONEBOOK
+
+--Exmaple of creating a clusetered index using the GUI
+
+USE [SQL2]
+GO
+Drop table PHONEBOOK
+
+
+
 ----------------------------------------------------------------------------
+
+
+
+--View data with clustered index (lname column is still sorted)
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+-- Create another clustered index causes an issue (on fname) because you can only have one clustered index
+
+USE [SQL2]
+GO
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_phonebookid]
+ON PhoneBook(phonebookid ASC)
+
+
+Drop index [PhoneBook].[Idx_PhoneBook_lname]
+
+--Can create an single clustered index that has multiple columns
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_Fname_Lname]
+ON [dbo].[PhoneBook](lname ASC,fname ASC) --<< multiple columns
+
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+--Example of non clustered index
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NC_Ind_PhoneBook_ fname]  --<< notice that after creation of a non clustered index, the data is not sorted
+ON PhoneBook(fname ASC)
+
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+--Can create multiple non clustered index (On lname)
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NC_Ind_PhoneBook_phone] --<< second creation of an index and phone
+ON PhoneBook(phone ASC)
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
 ----------------------------------------------------------------------------
+
+--Find all created indexes
+
+Use AdventureWorks2014
+go
+
+sp_helpindex '[HumanResources].[Department]'  --<< sproc followed by table name
+
+
+--Create a composite index (two or more columns are specified) on a non clustered index
+
+USE [SQL2]
+Go
+
+
+CREATE NONCLUSTERED INDEX [NC_Ind_People_Lname_Fname] 
+ON [dbo].[People]
+(Lname ASC,Fname ASC) --<< Note the order of the columns specified is important.  place the column in order of the query's where clause order
+
+
+sp_helpindex people  --<< sproc followed by table name
+
+
+
+--Find all created indexes (two ways: GUI or sproc)
+
+Use AdventureWorks2014
+go
+
+sp_helpindex '[HumanResources].[Department]'  --<< sproc followed by table name
+
+
+--Create a composite index (two or more columns are specified) on a non clustered index
+
+USE [SQL2]
+Go
+
+
+CREATE NONCLUSTERED INDEX [NC_Ind_People_Lname_Fname] --<< the more columns you chose to index, the longer it will take to create the index!!
+ON [dbo].[People]
+(Lname ASC,Fname ASC) --<< Note the order of the columns specified is important.  place the column in order of the query's where clause order
+
+
+--4 mins
+
+
+USE [SQL2]
+Go
+
+sp_helpindex people  --<< sproc followed by table name
+
+
+USE [SQL2]
+Go
+
+DROP INDEX [NC_Ind_People_Lname_Fname] ON [dbo].[People]
+GO
+
+
+
+--Example: Running a query with out an index looking for the last name 'Franklin600'
+--as there is no index on the lname, the query will have to start from the first row and sequentially go through 
+--all the 50 million rows until it finds the lname Franklin600!!!  (this is called a table scan and very poor for performance)
+
+
+USE [SQL2]
+GO
+
+SELECT * 
+  FROM [dbo].[People]
+  where Lname = 'Franklin600'
+GO
+--that took 35 seconds!!! 12 rows (before  creating of an index on lname)
+
+
+--Create an index on lname (to create an index on lname column, the data has to be sorted and has pointers to the actual data in a table)
+--the creatinon of an index can take along time because it is 'copying' the the column lname seperately with pointers to data!!
+--any time you update the table people with and insert, update or delete, the index on that column has to be updated ALSO. 
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NC_Ind_People_Lname] 
+ON [dbo].[People]([Lname] ASC)
+--2:45 mins
+
+
+--Run select statment after the index creating
+
+
+USE [SQL2]
+GO
+
+SELECT * 
+  FROM [dbo].[People]
+ --where Lname = 'Franklin600'
+ where Lname = 'Everett652'
+GO
+--that less than a second!!! 12 rows (after the creating of an index on lname)
+
+
+
 ----------------------------------------------------------------------------
+
+USE [SQL2]
+GO
+
+--create a table and use the SQL Data Generator to insert 1 million rows
+
+--CREATE TABLE [dbo].[People2](
+--	[Fname] [varchar](20) NULL,
+--	[Lname] [varchar](20) NULL,
+--	[Phone] [varchar](20) NULL
+--) ON [PRIMARY]
+
+--GO
+
+--Use SQL Data Generator to poulate 10 million rows
+--select count (*) from people2
+--15,000,000 rows
+
+--When to create/use and not to use an index.  Find the phone number for lname Lambert   --<< don't use
+
+SELECT TOP 10 [Fname]
+      ,[Lname]
+      ,[Phone]
+  FROM [SQL2].[dbo].[People2]
+
+
+--When to create/use and not to use an index.  Find the phone number for lname Conrad --<< don't use
+
+  SELECT TOP 100 [Fname]
+      ,[Lname]
+      ,[Phone]
+  FROM [SQL2].[dbo].[People2]
+
+ --When to create/use and not to use an index.  Find the phone number for lname Sanders  --<< don't use
+
+
+SELECT TOP 1000 [Fname]
+      ,[Lname]
+      ,[Phone]
+  FROM [SQL2].[dbo].[People2]
+
+   --When to create/use and not to use an index.  Find the phone number for lname Robertson  --<<  use
+
+  SELECT  [Fname] 
+      ,[Lname]
+      ,[Phone]
+  FROM [SQL2].[dbo].[People2]
+  Where lname = 'Robertson'
+
+
+  -- So when should we create an index?  The first answer to this is when there is large amount of data (but other considrations)
+
+  --If we create an indexm how does the clustered index help us retrieve last name data faster?  bu sorting the lname column
+  --you alphabatize the lname and as such, if you encounter two SAME lname, they will be next to each other.
+
+
+  --Create a clustered index on lname to sort the data.  This wil improve retrival of lname data
+
+USE [SQL2]
+GO
+
+CREATE CLUSTERED INDEX [Ind_People2_Lname] 
+ON [People2]([Lname] ASC)
+
+
+
+  SELECT   [Fname] 
+      ,[Lname]
+      ,[Phone]
+  FROM [SQL2].[dbo].[People2]
+  Where lname = 'Robertson'
+
+
+  
 ----------------------------------------------------------------------------
+
+
+What Is an Index?
+•	An index can be best described as a pointer to data in a table. An index in a database is very similar to an index in the back of a book or the phone book.  Indexes are created on the table or the view
+Purpose of index
+•	The purpose of an index is to retrieve data from a table efficiently and fast
+Types of indexes
+•	Clustered Indexes
+Clustered indexes sort the data rows in the table or view based on their key values, as such there can be only one clustered index per table. When a table does not have an index, it is referred to as a heap.  When you create a clustered index, it does not require any additional disk space
+•	Non-clustered Indexes
+A Nonclustered index have a structure separate from the data rows, much like the index in back of a book; and as such does require disk space, as it’s a separate object. A nonclustered index contains a pointer to the data row that contains the key value. For a heap, a row locator is a pointer to the row. For a clustered table, the row locator is the clustered index key. 
+•	Composite Indexes
+
+
+	A composite index is an index on two or more columns of a table. You should consider performance when creating a composite index because the order of columns in the index has a measurable effect on data retrieval speed. Generally, the most restrictive value should be placed first for optimum performance. However, the columns that will always be specified should be placed first. 
+
+
+ Other less used indexes (depends)
+
+•	Covering Indexes
+•	Full-text
+•	Filtered Indexes
+•	Column-based Indexes
+•	Spatial
+•	XML
+
+
+Creating indexes using TSQL and GUI
+
+
+CREATE INDEX index_name
+ON table_name (column_name)
+
+CREATE UNIQUE INDEX index_name
+ON table_name (column_name)
+
+CREATE NONCLUSTERED INDEX [indexname] 
+ON table_or_view_name ([columnname] ASC|DESC) 
+
+
+DROP INDEX index_name ON table_name
+
+
+--CREATE CLUSTERED INDEX index_name
+--ON table_name (column_name)
+
+
+
+EXAMPLE OF INDEXES AND CLUSTERED INDEX
+
+--Insert 1000 records from  RedGate app
+  
+USE [SQL2]
+GO
+
+CREATE TABLE [dbo].[PhoneBook](
+	[PhoneBookID] [int] NULL,
+	[lname] [varchar](50) NULL,
+	[fname] [varchar](50) NULL,
+	[phone] [varchar](50) NULL
+) ON [PRIMARY]
+
+GO
+
+--Insert 1000 records from RedGate app
+
+--View the 1000 records. Notice that the last name is not in any particular order
+ 
+SELECT * FROM PHONEBOOK
+
+--Insert record into phonebook table and notice the row is inserted after 1000 rows, as there is no index and the Lname is in no particular order
+
+Insert into PHONEBOOK
+values (1001,'Abba','Sara','555-1212')
+
+SELECT * FROM PHONEBOOK
+
+--repeat with another record
+
+Insert into PHONEBOOK
+values (1002,'Turner','Mike','805-555-1212')
+
+SELECT * FROM PHONEBOOK
+
+
+--Create a clustered index on table phonebook and column Lname so that the last name is alphabetized (its sorted by the clustered index created)
+
+USE [SQL2]
+GO
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_Lname] --<< Index name with prefix, table name and column name (convention for clarity)
+ON PhoneBook(Lname ASC)                      --<< Table and column name
+GO
+
+
+--View the 1000 records. This time notice that the last name IS in order by the last!
+ 
+SELECT * FROM PHONEBOOK
+
+--Now with the clusttered index in place, if we insert a record, it will automatically be inserted in the sorted order.
+
+Insert into PHONEBOOK
+values (1003,'Briggham','Johm','777-555-1212')
+
+SELECT * FROM PHONEBOOK
+
+USE [SQL2]
+GO
+Drop table PHONEBOOK
+
+
+NON CLUSTERED INDEX SCRIPT
+
+
+
+--View data with clustered index (lname column is still sorted)
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+-- Create another clustered index causes an issue (on fname) because you can only have one clustered index
+
+USE [SQL2]
+GO
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_phonebookid]
+ON PhoneBook(phonebookid ASC)
+
+
+Drop index [PhoneBook].[Idx_PhoneBook_lname]
+
+--Can create an single clustered index that has multiple columns
+
+CREATE CLUSTERED INDEX [Idx_PhoneBook_Fname_Lname]
+ON [dbo].[PhoneBook](lname ASC,fname ASC) --<< multiple columns
+
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+--Example of non clustered index
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NC_Ind_PhoneBook_ fname]  --<< notice that after creation of a non clustered index, the data is not sorted
+ON PhoneBook(fname ASC)
+
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+--Can create multiple non clustered index (On lname)
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NC_Ind_PhoneBook_phone] --<< second creation of an index and phone
+ON PhoneBook(phone ASC)
+
+SELECT*
+FROM [SQL2].[dbo].[PhoneBook]
+
+
+
+
+
+
+
+
+
+
+
+
+
+When should indexes be considered and 
+What factors influence creation of indexes?
+
+When the table is large in size (row count)
+•	Contains millions if not 100’s of millions rows
+When the table is used frequently
+•	The table is used more than just infrequently
+When the columns are frequently used in the WHERE clause 
+•	The query against the database has where clause
+Columns that are frequently referenced in the ORDER BY and GROUP BY clauses
+•	If you’re sorting data, then its beneficial
+Indexes should be created on columns with a high number of unique values
+•	Create indexes on columns that are all virtually unique such as integer
+Create a single column index on single where clause query
+•	If the where clause has a single column then create a single index
+Create a multiple column index on multiple where clause query
+•	If the where clause has multiple columns then create multiple index
+Build index on columns of integer type
+•	Integers take less space to store, which means the query will be faster
+
+The order of the composite index matters, so place the column in the index as with the where clause
+•	Use the column with the lowest cardinality first, and the column with the highest cardinality last, which means keep the unique column first and less unique column last (select distinct col1 from table)
+Testing is the key in determining what will work for your environment. Play with different combinations of indexes, no indexes, single-column indexes, and composite indexes. 
+When Should Indexes Be Avoided?
+
+Indexes should not be used on small tables
+•	Smaller tables do better with a table scan
+Indexes should not be used on columns that contain a high number of NULL values.
+•	Maintenance on the index can become excessive
+Don’t use an index that will return a high percentage of data 
+•	few distinct values such as gender
+Creating indexes come with a cost
+•	Indexes take up disk space 
+•	INSERT, UPDATE, and DELETE operations become slower, since the database system need to update the values in the table, and it also needs to update the indexes
+
+
+
+/*
+
+Note: table people in db SQL2 has beeen updated to contain 100,000,000 million rows using SQL Data Generator
+
+Select count (*) from people  --100000000 rows
+
+Use the where clause for lname (single column index would be beneficial
+if the table is used frequently, otherwise do not create an index
+
+*/
+
+--Using the WHERE clause without an index (1 min 10 sesc)
+--click on icon to display estimated execution plan (shows that a table scan will be executed and missing non clustered index is suggested on lname and others columns)
+--the display estimated execution plan dose not execute the query, but shows the plan if executed!!
+
+USE [SQL2]
+GO
+
+SELECT [PeopleID]  --<< note while i am using all the columns, in a production server, use only columns that are needed
+      ,[Fname]
+      ,[Lname]
+      ,[Address1]
+      ,[City]
+      ,[State]
+      ,[Zip]
+      ,[Country]
+      ,[Phone]
+  FROM [dbo].[People]
+  WHERE Lname = 'Spence'
+
+GO
+
+--Using the WHERE clause without a non clustered index on lname  (1 min 10 sesc)
+
+--Before runnng the script, create the 'suggeted' non clustered index
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [<Name of Missing Index, sysname,>]
+ON [dbo].[People] ([Lname])
+--INCLUDE ([PeopleID],[Fname],[Address1],[City],[State],[Zip],[Country],[Phone])--<< INCLUDE MEANS INCLUDE NON KEY COLUMNS. THIS COVERS MORE QUERIES
+GO
+
+--5 MIN 30 SEC
+
+
+--RERUN THE SCRIPT FOR FINDING ALL DATA FOR LNAME SPENCE.  REMEMBER, IN A PRODUCTION SERVER, DONT USE ALL THE FIELDS, ONLY THE ONES THAT ARE NEEDED.
+
+USE [SQL2]
+GO
+
+SELECT  [PeopleID]
+      ,[Fname]
+      ,[Lname]
+      ,[Address1]
+      ,[City]
+      ,[State]
+      ,[Zip]
+      ,[Country]
+      ,[Phone]
+  FROM [dbo].[People]
+  --WHERE Lname = 'Spence'
+  WHERE Lname =  'Zuniga'
+GO
+
+
+--1st run = 2 min 15 sec
+--2nd run = 10 sec  (becasue it is cached)
+
+
+--without all columns
+
+USE [SQL2]
+GO
+
+SELECT  [PeopleID]
+      ,[Fname]
+      ,[Lname]
+  FROM [dbo].[People]
+  --HERE Lname = 'Spence'
+  WHERE Lname =  'Zuniga'
+GO
+
+--2 sec
+
+
+----------------------------------------------------------------------------
+
+
+/*
+
+The system function sys.dm_db_index_physical_stats provides you inforamation about fragmetation
+
+*/
+
+--BACKUP TABLE PEOPLE3
+
+--SELECT * INTO PEOPLE3BACKUP FROM People3
+
+--SCRIPT TO INDICATE PERCENT OF FRAGMENTATION BEFORE INDEX CREATIONS
+
+SELECT a.index_id, name, avg_fragmentation_in_percent
+FROM sys.dm_db_index_physical_stats (DB_ID(N'SQL2'), 
+OBJECT_ID(N'SQL2'), NULL, NULL, NULL) AS a
+JOIN sys.indexes AS b ON a.object_id = b.object_id AND a.index_id = b.index_id; 
+GO
+
+
+
+--CREATE IN INDEX
+
+
+USE [SQL2]
+GO
+
+CREATE NONCLUSTERED INDEX [NonClusteredIndex-lname] 
+ON [dbo].[PEOPLE3]
+([Lname] ASC)
+
+
+SELECT a.index_id, name, avg_fragmentation_in_percent
+FROM sys.dm_db_index_physical_stats (DB_ID(N'SQL2'), 
+OBJECT_ID(N'PEOPLE3'), NULL, NULL, NULL) AS a
+JOIN sys.indexes AS b ON a.object_id = b.object_id AND a.index_id = b.index_id; 
+GO
+
+
+--index_id	name	                  avg_fragmentation_in_percent
+--3	        NonClusteredIndex-lname	  0.0101153145862836
+
+
+--FIND LNAME WITH HANSON WITHOUT INDEX
+
+USE [SQL2]
+GO
+
+SELECT [PeopleID]
+      ,[Fname]
+      ,[Lname]
+      ,[Address1]
+      ,[City]
+      ,[State]
+      ,[Zip]
+      ,[Country]
+      ,[Phone]
+  FROM [dbo].[People3]
+  WHERE Lname = 'HANSON'
+GO
+
+
+--FIND LNAME AND FNAME WITHOUT COMPOSITE INDEX
+
+USE [SQL2]
+GO
+
+SELECT [PeopleID]
+      ,[Fname]
+      ,[Lname]
+      ,[Address1]
+      ,[City]
+      ,[State]
+      ,[Zip]
+      ,[Country]
+      ,[Phone]
+  FROM [dbo].[People3]
+  WHERE Lname = 'HANSON' OR Fname = 'EVA'
+GO
+
+
+--INSERT INTO PEOPLE A ROW
+
+INSERT INTO [dbo].[People3]
+VALUES (10000001,'Peggy','Villarreal', '777 Fabien Freeway','Lubbock','Alaska','59320','Morocco','959-485-3114')
+GO 50000
+--20 SEC
+
+
+SELECT * FROM PEOPLE3 WHERE PeopleID LIKE  '%10000001'
+
+--UPDATE LNAME WHERE LNAME IS BAXTER TO SUPERMAN
+
+
+UPDATE People3
+SET Lname = 'SUPERMAN'
+WHERE Lname = 'BAXTER'
+
+UPDATE People3
+SET Lname = 'BATMAN'
+WHERE Lname = 'Dickson'
+
+UPDATE People3
+SET Lname = 'HULK'
+WHERE Lname = 'King'
+
+UPDATE People3
+SET Lname = 'JOKER'
+WHERE  PeopleID BETWEEN '29740284' AND '31630639'
+--5002044
+
+
+DELETE FROM PEOPLE3 WHERE PeopleID BETWEEN '34546957' AND '39549000'
+--5002044
+
+
+
+
+
+
+
+----------------------------------------------------------------------------
+
+Index Fragmentation (Rebuild or Reorganize an Index)
+
+•	When index fragmentation occurs should you reorganize or rebuild a fragmented index (it depends)
+•	Whenever an insert, update, or delete operations occur against the underlying data, SQL automatically maintains indexes
+•	These operation cause index fragmentation and can cause performance issues
+•	Fragmentation exists when indexes have pages in which the logical ordering, based on the key value, does not match the physical ordering inside the data file
+•	When you Rebuild an index SQL drops and re-creates the index and removes fragmentation, reclaims disk space by compacting and reorders the index rows in contiguous pages
+•	When you Reorganize an index it defragments the leaf level of clustered and nonclustered indexes on tables and views by physically reordering the leaf-level 
+•	The system function sys.dm_db_index_physical_stats, allows you to detect fragmentation 
+•	If avg_fragmentation_in_percent value
+•	> 5% and < = 30%    REORGANIZE
+•	> 30%                        REBUILD 
+•	Rebuilding an index can be executed online or offline. 
+•	Reorganizing an index is always executed online. 
+
+
+***********************************************
+
+
+USE [master];
+GO
+ 
+CREATE DATABASE ShrinkDB;
+GO
+
+USE [ShrinkDB];
+GO
+ 
+
+-- Create an initial table at the 'front' of the data file
+CREATE TABLE Initial (
+    [col1] INT IDENTITY,
+    [col2] CHAR (8000) DEFAULT 'Front');
+GO
+
+
+-- Insert data into Initial table
+INSERT INTO Initial DEFAULT VALUES;
+GO 1500
+
+select * from Initial
+
+--check the size of the database
+sp_helpdb [ShrinkDB]
+--14.83 MB
+ 
+-- Create the second table, which will be created 'after' the initial table in the data file
+CREATE TABLE second (
+    [col1] INT IDENTITY,
+    [col2] CHAR (8000) DEFAULT 'after');
+
+--create a clusterd index on the second table
+CREATE CLUSTERED INDEX [coll] ON second ([col1]);
+GO
+ 
+
+-- Insert data into second table
+INSERT INTO second DEFAULT VALUES;
+GO 1500
+
+
+select * from second
+
+--check db size 
+sp_helpdb [ShrinkDB]
+
+--database expanded due to insert of data in the second table (26.83 MB)
+ 
+-- Check the fragmentation of the second table
+SELECT
+    [avg_fragmentation_in_percent]
+FROM sys.dm_db_index_physical_stats (
+    DB_ID (N'ShrinkDB'), OBJECT_ID (N'second'), 1, NULL, 'LIMITED');
+GO
+
+--notice that the fragmentation of the clustered index for the second table is almost zero before the shrink
+--0.333333333333333
+
+--We will now drop the initial table we created and execute the shrink command to reclaim the SPACE at the front of the data file
+-- then see what happens to the fragmentaion.
+
+DROP TABLE Initial;
+GO
+
+
+sp_helpdb [ShrinkDB]
+-- 26.83 MB the data file has not shrunk due to the deletion of the initial table
+ 
+-- Shrink the database
+DBCC SHRINKDATABASE ([ShrinkDB]);
+GO
+
+--notice that the SPACE after the shrink went down from 26.83 to 15.02 mb
+sp_helpdb [ShrinkDB]
+--15.02 MB
+ 
+-- But notice what happened to the fragmentation of the data file because of the shrinking of the database???
+--when Checking the index fragmentation again, we notice that the fragmentation has drastically increased to almost 100%!!!
+--this is because we have shuffled all the data pages and the index is not in a sorted position
+
+SELECT
+    [avg_fragmentation_in_percent]
+FROM sys.dm_db_index_physical_stats (
+    DB_ID (N'ShrinkDB'), OBJECT_ID (N'second'), 1, NULL, 'LIMITED');
+GO
+
+--99.6
+
+--while the database has shrunk, and we have reclaimed space from the data file, we MUST now the fix the fragmented index of the table by rebuilding the index!!!
+
+-- Rebuild or Reorganize the Clustered Index?
+
+--If avg_fragmentation_in_percent value
+--> 5% and < = 30%    REORGANIZE
+--> 30%               REBUILD 
+
+
+ALTER INDEX [coll] ON second REBUILD
+GO
+
+ALTER INDEX [coll] ON second REORGANIZE
+GO
+
+-- Checking the index fragmentation again indicates that the fragmentaion of the index has been restored, but notice the size of the data
+--file when we run the sp_helpdb [ShrinkDB] - it has actually GROWN even more than it started from!!!
+
+SELECT
+    [avg_fragmentation_in_percent]
+FROM sys.dm_db_index_physical_stats (
+    DB_ID (N'ShrinkDB'), OBJECT_ID (N'second'), 1, NULL, 'LIMITED');
+GO
+
+--0.2%
+
+sp_helpdb [ShrinkDB]
+--41.81 MB
+
+--the database file has grown because of the rebuilding of the index and the logging of the index
+
+
+
+----------------------------------------------------------------------------
+
+
+What is the SQL Profiler?
+     SQL Profiler is a graphical tool that allows the DBAs to monitor events in an instance of Microsoft SQL Server. Once those events and data are captured, you can save the results to a file or a table for later analysis
+
+The next few videos I will demonstrate the following capabilities of the Profiler:
+•	How to monitor the performance of an instance of SQL Server via trace
+•	Review and debug T-SQL statements and stored procedures
+•	Identify what is causing slow-executing queries
+•	Audit activity against the SQL Server by tracing logins and users (security)
+•	Use the tuning template to analyze Indexes
+•	Add a user profiler template
+•	Best practice in using the SQL Profiler
+Does and don’ts of SQL Profiler
+•	Since the Profiler adds a lot of overhead to production server, filter trace
+•	Save the trace to a file rather than a table first
+•	Use only when needed for short period of time, as it consumes CPU
+•	Configured the trace only relevant events and columns
+Terminology
+Event – An event is an action within an instance of SQL Server Database Engine
+Trace – A trace captures data based on the columns and events
+Template – A template defines the default configuration or one that you set for the trace
+
+
+
+----------------------------------------------------------------------------
+
+USE [SQL2]
+GO
+
+SELECT TOP 100000 *
+FROM [dbo].[People]
+GO
+
+
+-- 1 SEC
+
+SELECT TOP 200000 *
+FROM [dbo].[People]
+GO
+
+
+--2 SEC
+
+SELECT TOP 300000 *
+FROM [dbo].[People]
+GO
+
+--4 SEC
+
+SELECT TOP 700000 *
+FROM [dbo].[People]
+GO
+
+--9 SEC
+
+SELECT TOP 800000 *
+FROM [dbo].[People]
+GO
+
+--10
+
+SELECT TOP 900000 *
+FROM [dbo].[People]
+GO
+
+--12
+
+SELECT TOP 1000000 *
+FROM [dbo].[People]
+GO
+--14 SECS
+
+USE [SQL2]
+GO
+
+SELECT TOP 2000000 *
+FROM [dbo].[People]
+GO
+--26 SECS
+
+SELECT TOP 3000000 *
+FROM [dbo].[People]
+GO
+
+--40 SEC
+
+
+  --the duration column i shown in millionth of a second, even though the filter was in 1000!!!
+
+  select Duration/1000000 as DurationsInSeconds,* --<< divide by 1 million to get seconds
+  from Duration
+  where Textdata like '%select%'
+
+
+
+  
+----------------------------------------------------------------------------
+
+
+---- Audit login Tom to see what he is doing??
+
+----Before creating a SQL Login, make user the that authentication is set to mixed mode.  will need to restart services
+
+----Create a SQL Login for Tom
+
+--USE [master]
+--GO
+
+--CREATE LOGIN [Tom] WITH PASSWORD=N'password123', 
+--DEFAULT_DATABASE=[master], 
+--CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
+--GO
+
+--USE [SQL2]
+--GO
+
+--CREATE USER [Tom] FOR LOGIN [Tom]
+--GO
+
+--USE [SQL2]
+--GO
+
+--ALTER ROLE [db_owner] ADD MEMBER [Tom] --<< Tom is a the databasse owner as such has
+--GO
+
+
+SELECT TOP 1000 [RowNumber]
+,[EventClass]
+,[Duration]
+,[TextData]
+,[SPID]
+,[BinaryData]
+FROM [SQL2].[dbo].[duration]-- 10 rows
+
+--Create a backup of duration table
+
+select * into duration013016 from duration
+
+ 
+
+--Audit deleted rows from login Tom using the profiler (find the sql statements against the database)
+
+delete from duration where RowNumber = 6
+
+
+
+/****** Script for SelectTopNRows command from SSMS  ******/
+SELECT TOP 1000 [RowNumber]
+      ,[EventClass]
+      ,[TextData]
+      ,[ApplicationName]
+      ,[NTUserName]
+      ,[LoginName]
+      ,[SPID]
+      ,[BinaryData]
+  FROM [SQL2].[dbo].[audit]
+  where loginname = 'tom' and textdata like '%delete%'
+
+
+----------------------------------------------------------------------------
+
+
+use SQL2
+go
+
+--select statements against SQL2 database gor SQL Tuning template
+
+--Create a user profiler template
+
+SELECT TOP 1000 [PeopleID]
+,[Fname]
+,[Lname]
+,[Address1]
+,[City]
+,[State]
+,[Zip]
+,[Country]
+,[Phone]
+FROM [SQL2].[dbo].[People]
+WHERE LNAME = 'Garcia'     --<< note that SQL will recommend INCLUDED columns to index when included in the select clause
+
+
+SELECT TOP 10000 
+[Lname]
+FROM [SQL2].[dbo].[People]
+WHERE LNAME = 'Houston'    --<< note that SQL will NOT recommend INCLUDED columns to index when not included in the select statement
+
+SELECT TOP 10000 *
+FROM [SQL2].[dbo].[People]
+WHERE Fname = 'gloria'     --<<the query optimizer detects that the where clause refers to the fname
+
+SELECT TOP 1000000 *
+FROM [SQL2].[dbo].[People]
+WHERE state = 'Utah'       --<<the query optimizer detects that the where clause refers to the state
+
+
+--Create a SQL Profiler Template
+
+Create database Testdb
+
+Use Testdb
+go
+
+Create Table test (col int)
+
+Drop Table test
+
+----------------------------------------------------------------------------
+
+
+use SQL2
+go
+
+--select statements against SQL2 database gor SQL Tuning template
+
+--Create a user profiler template
+
+SELECT TOP 1000 [PeopleID]
+,[Fname]
+,[Lname]
+,[Address1]
+,[City]
+,[State]
+,[Zip]
+,[Country]
+,[Phone]
+FROM [SQL2].[dbo].[People]
+WHERE LNAME = 'Garcia'     --<< note that SQL will recommend INCLUDED columns to index when included in the select clause
+
+
+SELECT TOP 10000 
+[Lname]
+FROM [SQL2].[dbo].[People]
+WHERE LNAME = 'Houston'    --<< note that SQL will NOT recommend INCLUDED columns to index when not included in the select statement
+
+SELECT TOP 10000 *
+FROM [SQL2].[dbo].[People]
+WHERE Fname = 'gloria'     --<<the query optimizer detects that the where clause refers to the fname
+
+SELECT TOP 1000000 *
+FROM [SQL2].[dbo].[People]
+WHERE state = 'Utah'       --<<the query optimizer detects that the where clause refers to the state
+
+----------------------------------------------------------------------------
+
+SQL Server statistics and the role it plays
+
+•	What is the SQL query optimizer?
+•	What is the function of the query optimizer?
+•	What are SQL Server Statistics?
+•	How does it help up in performance?
+•	How do you create statistics?
+•	How do you view them?
+•	Best practice for statistics
+      A query is a request for information from a database; this can be either a simple request or a complex request such as using joins
+      Since database structures are complex and the need to access the data can be achieved in different ways, (such as a table scan or use of index) the processing time to get that data may vary and SQL may need ‘help’ to retrieve that data. Statistics in SQL Server refers specifically to information that the server collects about the distribution of data in columns and indexes
+     This is where the query optimizer comes in.  Note, the query optimizer cannot be accessed directly by users, but the query optimizer attempts to determine the most efficient way to execute a given query by considering the possible query plans, such as using a table scan or the index, uses statistics to “find the best path” in its query optimization and factors such as number of records, density of pages, histogram, or available indexes all help the SQL Server optimizer in “guessing” the most efficient way to retrieve data
+     Thus query optimization typically tries to approximate the optimum processing time it will take to retrieve the data request
+
+So how are statistics created?
+      Statistics can be automatically created when you create an index. If the database setting auto create stats is on, then SQL Server will automatically create statistics for non-indexed columns that are used in queries
+
+See images
+•	Or they can be manually created by TSQL or GUI
+See image
+USE [AdventureWorks2014]
+GO
+
+CREATE NONCLUSTERED INDEX [NonClusteredIndex-20160203-192425] 
+ON [dbo].[People2]
+([Fname] ASC,[Lname] ASC)
+
+
+DBCC SHOW_STATISTICS ('people2','NonClusteredIndex-20160203-192425')
+WITH HISTOGRAM
+
+How are statistics updated?
+The default settings in SQL Server are to auto create and auto update statistics.
+
+Auto Update Statistics basically means, if there is an incoming query but statistics are stale, SQL Server will update statistics first before it generates an execution plan.
+
+Auto Update Statistics Asynchronously on the other hand means, if there is an incoming query but statistics are stale, SQL Server uses the stale statistics to generate the execution plan, then updates the statistics afterwards.
+What configuration settings should we set?
+Automatic Statistics
+By default, SQL Server databases automatically create and update statistics. The information that gets stored includes:
+•	The number of rows and pages occupied by a table's data
+•	The time that statistics were last updated
+•	The average length of keys in a column
+•	Histograms showing the distribution of data in a column
+
+
+****************************************
+
+
+-- Create an index.  When creating an index, the statistics are created automatically
+
+USE [AdventureWorks2014]
+GO
+
+CREATE NONCLUSTERED INDEX [NonClusteredIndex-20160203-192425] 
+ON [dbo].[People2]
+([Fname] ASC,[Lname] ASC)
+
+--view statistics via GUI
+
+--alternative way to view statistcs with DBCC command - distribution of data
+
+DBCC SHOW_STATISTICS ('people2','NonClusteredIndex-20160203-192425')
+WITH HISTOGRAM
+
+--list all of the statistics being maintained on a table
+
+use AdventureWorks2014
+go
+EXEC sp_helpstats 
+@objname = '[dbo].[People2]',
+@results = 'ALL';
+
+
+----------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------
+
+
