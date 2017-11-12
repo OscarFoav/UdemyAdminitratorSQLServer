@@ -4248,7 +4248,7 @@ Auto Update Statistics Asynchronously on the other hand means, if there is an in
 What configuration settings should we set?
 Automatic Statistics
 By default, SQL Server databases automatically create and update statistics. The information that gets stored includes:
-•	The number of rows and pages occupied by a table's data
+•	The number of rows and pages occupied by a table's data '
 •	The time that statistics were last updated
 •	The average length of keys in a column
 •	Histograms showing the distribution of data in a column
@@ -4285,14 +4285,978 @@ EXEC sp_helpstats
 ----------------------------------------------------------------------------
 
 
-----------------------------------------------------------------------------
+
+The next several videos will be devoted to SQL Server Monitoring and the tools that come with the SQL Server
+
+We will be discussing the following tools
+
+•	Windows Task Manager
+•	SQL Activity monitor
+•	SQL Performance Monitor
+•	SQL Database Management Views (DMV)
+•	Stored Procedures
+•	SQL Profiler
+
+
+Activity Monitor in SQL Server
+	
+    The primary function of the Activity Monitor is to allow the DBA to quickly view any potential performance issues in the server, network or the database.  If any contentions are occurring between SPIDs, this is where the DBA can kill the process
+
+     Viewing the Activity Monitor Dashboard you will notice four graphs which can help identity any abnormal activity in the Database.  Note that the refresh rate for each graph is 10 seconds; however it can be changed by right clicking on the graph
+
+Here is what he Activity monitor looks like:
+
+
+
+ 
+
+
+
+
+This dashboard also contain four panes where you can view more detailed information about each process inside the server
+
+
+
+Processor Time:
+
+The Processes pane gives information on what processes are running and what resources are being utilized etc.  You can right click this and view the Kill, Profiler, and Detail options 
+ 
+Waiting Tasks:
+
+The number of tasks that are waiting for processor, I/O, or memory resources.  The Resource Waits pane details the processes waiting for other resources on the server
+
+Database I/O: (Input/Output)
+
+Information on data and log files for both system and user defined databases. Provides information on such things as the transfer rate in MB/Sec, data from memory to disk, disk to memory, or disk to disk. This allow the DBA to quickly view what is causing I/O contention
+ 
+Batch Requests/sec:
+
+This pane show the number of batches being received, 
+Expensive queries running, and Find the Most Time Consuming Code in your SQL Server Database. If you right click this pane, you can view the execution plan option
+
+The various panes info
+The Processes pane shows the information about the currently running processes on the SQL databases, who runs them, and from which application.  Hover over each header to show tool tip
+
+Session ID – or SPID is a unique value assigned by Database Engine to every user connection. 
+User Process – 1 for user processes, 0 for system processes. 
+Task State – the task state, blank for tasks in the runnable and sleeping state
+PENDING: Waiting for a worker thread.
+RUNNABLE: Runnable, but waiting to receive a quantum.
+RUNNING: Currently running on the scheduler.
+SUSPENDED: Has a worker, but is waiting for an event.
+DONE: Completed.
+SPINLOOP: Stuck in a spinlock.
+•	Wait Time (ms) – how long in milliseconds the task is waiting for a resource. 
+•	Wait Type – the last/current wait type
+•	Wait Resource – the resource the connection is waiting for
+•	Blocked By – the ID of the session that is blocking the task. 
+•	Head Blocker – the session that causes the first blocking condition in a blocking chain
+•	Memory Use (KB) – the memory used by the task. 
+•	MB/sec Read – shows recent read activity for the database file
+•	MB/sec Written – shows recent write activity for the database file
+•	Response Time (ms) – average response time for recent read-and-write activity
+The Recent Expensive Queries pane
+Expensive queries are the queries that use much resources – memory, disk, and network
+•	Executions/min – the number of executions per minute, since the last recompilation. 
+•	CPU (ms/sec) – the CPU rate used, since the last recompilation. 
+•	Physical Reads/sec, Logical Writes/sec, and Logical Reads/ Average 
+•	Duration (ms) – average time that the query runs
+
+
 
 
 ----------------------------------------------------------------------------
 
+What is the (SQL) Performance Monitor?
+
+Windows Performance Monitor or PerfMon is a great tool to capture metrics for your entire Windows server and including your SQL Server environment.  It has easy to view graphs and counters that you can select to find a specific issue at hand.  
+There are counters for .NET, Disks, Memory, Processors, Network, and many for SQL Server related to each instance of SQL Server that you may have on the box. 
+The purpose of the perfmon is to identify the metrics you like to use to measure SQL Server performance and collecting them over time giving you a quick and easy way to identify SQL Server problems, as well as capture your performance trend over time.
+
+What are counters, what counters should we use?
+Depends!
+Counters are a method to measure current performance, as well as performance over time.  As there are many counters and there is no strict guideline as to use a specific counter, I suggest we look at some common ones for our demonstration and then allow the DBA to experience with others.  The best approach is to capture some common values when your system is running fine, so you can create a baseline.  Then once you have information about these counters and the baseline you can compare performance issues against the baseline.
+
+Measuring Windows counters example:
+•	Memory – Available MBytes 
+•	Paging File – % Usage 
+•	Physical Disk – Avg. Disk sec/Read 
+•	Physical Disk – Avg. Disk sec/Write 
+•	Physical Disk – Disk Reads/sec 
+•	Physical Disk – Disk Writes/sec 
+•	Processor – % Processor Time
+•	Network
+
+Measuring SQL Server counters:
+SQLServer: Buffer Manager: Buffer cache hit ratio
+The buffer cache hit ratio counter represents how often SQL Server is able to find data pages (smallest unit of data 8k) in its buffer cache when a query needs a data page. We want this number to be as close to a 100 as possible, which means that the SQL Server was able to get data for queries out of memory instead of reading from disk. A low number indicates memory issue.
+SQLServer: Buffer Manager: Page life expectancy
+The page life expectancy counter measures how long pages stay in the buffer cache in seconds. The longer a page stays in memory, the better as this indicates that the SQL Serve did not need to read from the disk.  A lower number indicates that the it’s reading form disk.  Update memory??
+SQLServer: SQL Statistics: Batch Requests/Sec
+Batch Requests/Sec measures the number of batches SQL Server is receiving per second. This information provides how much activity is being processed by your SQL Server box. The higher the number, the more queries are being executed on your box. Higher number indicates that the server is busy.  But, again create a baseline for you system.
+
+SQLServer: SQL Statistics: SQL Compilations/Sec
+The SQL Compilations/Sec measure the number of times SQL Server compiles an execution plan per second. Compiling an execution plan is a resource-intensive operation. One compile per every 10 batch requests.
+SQLServer: Locks: Lock Waits / Sec: _Total
+In order for SQL Server to manage concurrent users on the system, SQL Server needs to lock resources from time to time. The lock waits per second counter tracks the number of times per second that SQL Server is not able to retain a lock right away for a resource. Ideally you dont want any request to wait for a lock. Therefore you want to keep this counter at zero, or close to zero at all times.
+SQLServer: Access Methods: Page Splits / Sec
+This counter measures the number of times SQL Server had to split a page when updating or inserting data per second. Page splits are expensive, and cause your table to perform more poorly due to fragmentation. Therefore, the fewer page splits you have the better your system will perform. Ideally this counter should be less than 20% of the batch requests per second.
+
+SQLServer: General Statistics: User Connections
+The user connections counter identifies the number of different users that are connected to SQL Server at the time the sample was taken.  This does not refer to the end users, but rather connections that a user has to the server.  Thus a user can have many connections
+
+SQLServer: General Statistic: Processes Block
+The processes blocked counter identifies the number of blocked processes. When one process is blocking another process, the blocked process cannot move forward with its execution plan until the resource that is causing it to wait is freed up. Ideally you dont want to see any blocked processes. When processes are being blocked you should investigate.
+SQLServer: Buffer Manager: Checkpoint Pages / Sec
+The checkpoint pages per second counter measures the number of pages written to disk by a checkpoint operation. If this counter is climbing, it might mean you are running into memory pressures that are causing dirty pages to be flushed to disk more frequently than normal.
+
+
 
 ----------------------------------------------------------------------------
 
+Simple Demo to illustrate resource utilization
+Server Hardware:
+Central Processing Unit (CPU)
+Memory
+Disk
+Network
+The CPU is the brain of the computer.  As it gets more requests, it must work harder and faster at answering the queries
+The memory is the ‘space’ that is needed for the application for to ‘OPEN’.  Analogy:  a small physical desk can hold two or three pages of Time magazine.  As you get into opening larger newspaper, you will need more ‘space on that desk’
+The disk is the warehouse and placing the boxes next to each other for retrieval is easier than scatters around the large warehouse.  That is the I/O of the system.  The less I/Os the better for performance
+Network is the ‘highway’ for sending and getting data bits.  The NIC card and the channels for communication between resources gets bottle necked if there are large amounts of data to be sent or retrieved.  A faster highway lane with many booths can handle the traffic better than a single booth
+
+ 
+     One of the prime purpose of the Perfmon is to discover bottlenecks.  Thus, we must first understand what is a bottleneck? 
+     A bottleneck occurs when simultaneous access BY APPLICATION OR USERS to shared resources such as (CPU, memory, disk, network or other resources) causes an overload for the resources. This demand on shared resources can cause poor response time and must be identified and tuned by the DBA.  The tuning can be either hardware upgrade, application tuning or both.  Monitoring SQL Server performance is a complex task, as performance depends on many parameters, both hardware and software
+What causes bottleneck:
+•	Insufficient hardware resources which may require upgrade or replacement
+•	Resources are not distributed evenly; an example being one disk is being monopolized
+•	Incorrectly configured resources such as application or ill designed databases
+Some of the key areas to monitor to identify bottlenecks are as follows:
+•	CPU utilization	
+•	Memory usage	
+•	Disk input/output (I/O)	
+•	User connections	
+•	Blocking locks	
+So now that we know what resources to monitor, how should we begin?
+Before going out and buying a faster server or upgrading the existing server with faster CPUS, more memory and faster disks, obtain a baseline of metrics.  And always rule out software issues first such as poorly designed databases and insufficient indexes
+Start with obtaining a performance baseline. 
+You monitor the server over time so that you can determine Server average performance, identify peak usage, determine the time required for backup and restore activities, and so on.  This gives you a baseline from which you can judge the server against to determine if you have a performance bottleneck. This may be a weekly or monthly set of metrics that you obtain.  Each depends upon you environment.
+
+
+
+
+
+ ***************************************
+ 
+ 
+ 
+     One of the prime purpose of the Perfmon is to discover bottlenecks.  Thus, we must first understand what is a bottleneck? 
+     A bottleneck occurs when simultaneous access BY APPLICATION OR USERS to shared resources such as (CPU, memory, disk, network or other resources) causes an overload for the resources. This demand on shared resources can cause poor response time and must be identified and tuned by the DBA.  The tuning can be either hardware upgrade, application tuning or both.  Monitoring SQL Server performance is a complex task, as performance depends on many parameters, both hardware and software
+What causes bottleneck:
+•	Insufficient hardware resources which may require upgrade or replacement
+•	Resources are not distributed evenly; an example being one disk is being monopolized
+•	Incorrectly configured resources such as application or ill designed databases
+Some of the key areas to monitor to identify bottlenecks are as follows:
+•	CPU utilization	
+•	Memory usage	
+•	Disk input/output (I/O)	
+•	User connections	
+•	Blocking locks	
+So now that we know what resources to monitor, how should we begin?
+Before going out and buying a faster server or upgrading the existing server with faster CPUS, more memory and faster disks, obtain a baseline of metrics.  And always rule out software issues first such as poorly designed databases and insufficient indexes
+Start with obtaining a performance baseline. 
+You monitor the server over time so that you can determine Server average performance, identify peak usage, determine the time required for backup and restore activities, and so on.  This gives you a baseline from which you can judge the server against to determine if you have a performance bottleneck. This may be a weekly or monthly set of metrics that you obtain.  Each depends upon you environment.
+
+
+Hardware bottlenecks
+Most hardware bottlenecks can be attributed to disk throughput, memory usage, processor usage, or network bandwidth. 
+One problem can often mask another. You might suspect hard disk performance as the cause of degraded query performance. 
+You can sometimes relieve bottlenecks by rescheduling resource-intensive SQL Server activities so that there’s less of a load on the server. 
+One area you should check is the performance of queries.
+If you have queries that use excessive server resources, overall performance suffers. 
+SQL Profiler and the Database Engine Tuning Advisor can both help you gather information about queries. 
+
+CPU utilization	
+•	A chronically high CPU utilization rate may indicate that Transact-SQL queries need to be tuned or that a CPU upgrade is needed.  CPU usage greater than 80% consistently (plateauing)
+Memory usage	
+•	Insufficient memory allocated or available to Microsoft SQL Server degrades performance. SQL Server is a hog for memory and the more memory the better. If in sufficient memory is not allocated to the SQL Server, then Data must be read from the disk rather than directly from the data cache. This can cause performance issues.  
+Disk input/output (I/O)	
+•	Transact-SQL queries can be tuned to reduce unnecessary I/O; for example, by employing indexes.
+User connections	
+•	Too many users may be accessing the server simultaneously causing performance degradation.
+Blocking locks	
+•	Incorrectly designed applications can cause locks and hamper concurrency, thus causing longer response times and lower transaction throughput rates.
+
+Monitoring processor use
+High processor utilization can be an indication that: 
+1.	You need a processor upgrade (faster, better processor). 
+2.	You need an additional processor. 
+3.	You have a poorly designed application. 
+By monitoring processor activity over time, you can determine if you have a processor bottleneck and often identify the activities placing an excessive load on the processor.
+ Counters that you should monitor include those in the following table. 
+Object	Counter	Description
+Processor	% Processor Time 	Value should be consistently less than 90%. A consistent value of 90% or more indicates a processor bottleneck. Monitor this for each processor in a multiprocessor system and for total processor time (all processors). 
+System	Processor Queue Length 	The number of threads waiting for processor time. A consistent value of 2 or more can indicate a processor bottleneck. 
+In most cases, a processor bottleneck indicates you need to either upgrade to a faster processor or to multiple processors. In some cases, you can reduce the processor load by fine-tuning your application
+
+
+Monitor SQL Server memory usage 
+•	Memory: Available MBytes 
+•	Memory: Pages/sec 
+•	Memory: Page Faults/sec
+Available MBytes is the amount of physical memory, in Megabytes, immediately available for allocation to a process or for system use. The higher the value the better
+The Pages/sec counter indicates the number of pages that were retrieved from disk. A high value can indicate lack of memory.  
+Monitor the Memory: Page Faults/sec counter to make sure that the disk activity is not caused by paging.
+By default, SQL Server changes its memory requirements dynamically so there is no need to alter the memory parameters; but if you need to alter the memory, you can change that via GUI or TSQL
+To monitor the amount of memory that SQL Server specifically uses monitor
+
+•	SQL Server: Buffer Manager: Buffer Cache Hit Ratio 
+•	SQL Server: Memory Manager: Total Server Memory (KB) 
+•	SQL Server: Buffer Manager: Page Life Expectancy
+The Buffer Cache Hit Ratio counter is specific to SQL Server; Percentage of pages that were found in the buffer pool without having to incur a read from disk.  a rate of 90 percent or higher is desirable. A value greater than 90 percent indicates that more than 90 percent of all requests for data were satisfied from the data cache rather than the disk
+If the Total Server Memory (KB) counter is consistently high compared to the amount of physical memory in the computer, it may indicate that more memory is required.
+Page Life Expectancy is the number of seconds a page will stay in the buffer pool without references. The recommended value of the Page Life Expectancy counter is approximately 300 seconds. Simply put, the longer the page stays in the buffer pool the better performance you will get rather than getting the data from the disk
+
+
+Some common counters used for analyzing disk performance are:
+•	 Avg. Disk sec/Read - the average time, in seconds, of a read of data from the disk. 
+•	 Avg. Disk sec/Write - is the average time, in seconds, of a write of data to the disk.
+These metrics help how long the disks took to service an I/O request no matter what kind of hardware you using, weather its physical or virtual hardware.  If your system had many disks, then it’s important to measure each disk for discovering bottlenecks
+The average should be under 15ms with maximums up to 30ms. The less time it takes to read or write data the faster your system will be
+
+
+
+
+
+
+
+
+
+
+•	Disk Transfers/sec - is the rate of read and write operations on the disk. 
+•	Disk Reads/sec - is the rate of read operations on the disk. 
+•	Disk Writes/sec - is the rate of write operations on the disk. 
+•	Avg. Disk Queue Length - is the average number of both read and write requests that were queued for the selected disk during the sample interval. 
+•	Current Disk Queue Length - is the number of requests outstanding on the disk at the time the performance data is collected.
+
+
+ 
+ 
+----------------------------------------------------------------------------
+
+What are Dynamic Management Views (DMVs)
+
+Another tool at your disposal to measure performance and view details about the SQL Server is the DMVs.  Dynamic management views and functions return server state information that can be used to monitor the health of a server instance, diagnose problems, and tune performance
+
+There are two different kinds of DMVs and DMFs:
+•	Server-scoped: These look at the state of an entire SQL Server instance.
+•	Database-scoped: These look at the state of a specific database
+•	While the DMV can be used like the select statement, the DMF requires a parameter
+•	Some apply to entire server and are stored in the master database while others to each database
+•	Over 200 DMVs at this time
+
+
+The DMVs are broken down into the following categories:
+•	Change Data Capture Related Dynamic Management Views 
+•	Change Tracking Related Dynamic Management Views 
+•	Common Language Runtime Related Dynamic Management Views 
+•	Database Mirroring Related Dynamic Management Views 
+•	Database Related Dynamic Management Views 
+•	Execution Related Dynamic Management Views and Functions 
+•	Extended Events Dynamic Management Views 
+•	Full-Text Search Related Dynamic Management Views 
+•	Filestream-Related Dynamic Management Views (Transact-SQL) 
+•	I/O Related Dynamic Management Views and Functions 
+•	Index Related Dynamic Management Views and Functions 
+•	Object Related Dynamic Management Views and Functions 
+•	Query Notifications Related Dynamic Management Views 
+•	Replication Related Dynamic Management Views 
+•	Resource Governor Dynamic Management Views 
+•	Service Broker Related Dynamic Management Views 
+•	SQL Server Operating System Related Dynamic Management Views 
+•	Transaction Related Dynamic Management Views and Functions 
+•	Security Related Dynamic Management Views 
+
+--website to DMV
+https://msdn.microsoft.com/en-us/library/ms188754.aspx
+A few common examples of DMVs:
+
+--view all DMVs
+
+SELECT name, type, type_desc
+FROM sys.system_objects
+WHERE name LIKE 'dm_%'
+ORDER BY 2 desc
+
+
+SELECT * FROM SYS.dm_os_memory_allocations               --<< Notice that all DMVs starts with SYS.DM
+SELECT * FROM SYS.dm_db_xtp_nonclustered_index_stats   
+SELECT * FROM SYS.dm_db_mirroring_past_actions
+SELECT * FROM SYS.dm_xe_session_object_columns
+SELECT * FROM SYS.dm_os_loaded_modules
+SELECT * FROM SYS.dm_db_task_space_usage
+SELECT * FROM SYS.dm_os_memory_objects
+SELECT * FROM SYS.dm_audit_class_type_map
+SELECT * FROM SYS.dm_os_schedulers
+SELECT * FROM SYS.dm_os_server_diagnostics_log_configurations
+SELECT * FROM SYS.dm_hadr_instance_node_map
+SELECT * FROM SYS.dm_io_cluster_valid_path_names
+SELECT * FROM SYS.dm_os_dispatcher_pools
+SELECT * FROM SYS.dm_xtp_transaction_stats
+SELECT * FROM SYS.dm_exec_query_profiles
+SELECT * FROM SYS.dm_os_threads
+SELECT * FROM SYS.dm_repl_tranhash
+SELECT * FROM SYS.dm_hadr_cluster
+SELECT * FROM SYS.dm_qn_subscriptions
+SELECT * FROM SYS.dm_db_session_space_usage
+SELECT * FROM SYS.dm_xtp_gc_stats
+SELECT * FROM SYS.dm_exec_query_optimizer_info
+SELECT * FROM SYS.dm_xe_map_values
+SELECT * FROM SYS.dm_db_xtp_index_stats
+SELECT * FROM SYS.dm_tran_top_version_generators
+SELECT * FROM SYS.dm_fts_fdhosts
+SELECT * FROM SYS.dm_xe_sessions
+SELECT * FROM SYS.dm_db_log_space_usage
+SELECT * FROM SYS.dm_hadr_name_id_map
+SELECT * FROM SYS.dm_os_waiting_tasks
+SELECT * FROM SYS.dm_exec_background_job_queue
+SELECT * FROM SYS.dm_resource_governor_resource_pool_volumes
+SELECT * FROM SYS.dm_os_hosts
+SELECT * FROM SYS.dm_os_memory_brokers
+SELECT * FROM SYS.dm_exec_requests
+SELECT * FROM SYS.dm_tran_commit_table
+SELECT * FROM SYS.dm_db_missing_index_details
+SELECT * FROM SYS.dm_clr_properties
+SELECT * FROM SYS.dm_os_sublatches
+SELECT * FROM SYS.dm_os_buffer_pool_extension_configuration
+SELECT * FROM SYS.dm_exec_query_memory_grants
+SELECT * FROM SYS.dm_fts_outstanding_batches
+SELECT * FROM SYS.dm_logpool_hashentries
+SELECT * FROM SYS.dm_os_wait_stats
+SELECT * FROM SYS.dm_os_memory_node_access_stats
+SELECT * FROM SYS.dm_os_spinlock_stats
+SELECT * FROM SYS.dm_database_encryption_keys
+SELECT * FROM SYS.dm_db_xtp_checkpoint_stats
+SELECT * FROM SYS.dm_hadr_availability_replica_states
+SELECT * FROM SYS.dm_broker_connections
+SELECT * FROM SYS.dm_db_mirroring_auto_page_repair
+SELECT * FROM SYS.dm_server_registry
+SELECT * FROM SYS.dm_tran_current_snapshot
+SELECT * FROM SYS.dm_os_dispatchers
+SELECT * FROM SYS.dm_os_stacks
+SELECT * FROM SYS.dm_db_xtp_object_stats
+SELECT * FROM SYS.dm_filestream_non_transacted_handles
+SELECT * FROM SYS.dm_xe_session_targets
+SELECT * FROM SYS.dm_fts_memory_buffers
+SELECT * FROM SYS.dm_fts_index_population
+SELECT * FROM SYS.dm_tran_current_transaction
+SELECT * FROM SYS.dm_os_cluster_properties
+SELECT * FROM SYS.dm_os_child_instances
+SELECT * FROM SYS.dm_exec_connections
+SELECT * FROM SYS.dm_server_memory_dumps
+SELECT * FROM SYS.dm_xtp_threads
+SELECT * FROM SYS.dm_exec_background_job_queue_stats
+SELECT * FROM SYS.dm_os_memory_broker_clerks
+SELECT * FROM SYS.dm_filestream_file_io_handles
+SELECT * FROM SYS.dm_xtp_transaction_recent_rows
+SELECT * FROM SYS.dm_hadr_availability_replica_cluster_nodes
+SELECT * FROM SYS.dm_fts_active_catalogs
+SELECT * FROM SYS.dm_tran_database_transactions
+SELECT * FROM SYS.dm_filestream_file_io_requests
+SELECT * FROM SYS.dm_cdc_log_scan_sessions
+SELECT * FROM SYS.dm_os_memory_cache_clock_hands
+SELECT * FROM SYS.dm_repl_schemas
+SELECT * FROM SYS.dm_db_mirroring_connections
+SELECT * FROM SYS.dm_audit_actions
+SELECT * FROM SYS.dm_hadr_availability_group_states
+SELECT * FROM SYS.dm_os_ring_buffers
+SELECT * FROM SYS.dm_db_xtp_table_memory_stats
+SELECT * FROM SYS.dm_db_missing_index_groups
+SELECT * FROM SYS.dm_hadr_cluster_members
+SELECT * FROM SYS.dm_db_uncontained_entities
+SELECT * FROM SYS.dm_exec_cached_plans
+SELECT * FROM SYS.dm_hadr_availability_replica_cluster_states
+SELECT * FROM SYS.dm_exec_sessions
+SELECT * FROM SYS.dm_os_memory_clerks
+SELECT * FROM SYS.dm_hadr_auto_page_repair
+SELECT * FROM SYS.dm_db_xtp_memory_consumers
+SELECT * FROM SYS.dm_repl_articles
+SELECT * FROM SYS.dm_xe_session_events
+SELECT * FROM SYS.dm_broker_forwarded_messages
+SELECT * FROM SYS.dm_resource_governor_resource_pools
+SELECT * FROM SYS.dm_db_xtp_checkpoint_files
+SELECT * FROM SYS.dm_db_partition_stats
+SELECT * FROM SYS.dm_io_pending_io_requests
+SELECT * FROM SYS.dm_xtp_system_memory_consumers
+SELECT * FROM SYS.dm_hadr_cluster_networks
+SELECT * FROM SYS.dm_os_nodes
+SELECT * FROM SYS.dm_tcp_listener_states
+SELECT * FROM SYS.dm_os_memory_cache_entries
+SELECT * FROM SYS.dm_os_virtual_address_dump
+SELECT * FROM SYS.dm_os_memory_cache_hash_tables
+SELECT * FROM SYS.dm_cdc_errors
+SELECT * FROM SYS.dm_resource_governor_configuration
+SELECT * FROM SYS.dm_exec_query_stats
+SELECT * FROM SYS.dm_fts_semantic_similarity_population
+SELECT * FROM SYS.dm_clr_tasks
+SELECT * FROM SYS.dm_db_xtp_hash_index_stats
+SELECT * FROM SYS.dm_os_worker_local_storage
+SELECT * FROM SYS.dm_db_persisted_sku_features
+SELECT * FROM SYS.dm_os_sys_memory
+SELECT * FROM SYS.dm_cryptographic_provider_properties
+SELECT * FROM SYS.dm_tran_transactions_snapshot
+SELECT * FROM SYS.dm_os_buffer_descriptors
+SELECT * FROM SYS.dm_tran_active_snapshot_database_transactions
+SELECT * FROM SYS.dm_server_services
+SELECT * FROM SYS.dm_tran_active_transactions
+SELECT * FROM SYS.dm_db_file_space_usage
+SELECT * FROM SYS.dm_broker_activated_tasks
+SELECT * FROM SYS.dm_broker_queue_monitors
+SELECT * FROM SYS.dm_os_memory_cache_counters
+SELECT * FROM SYS.dm_tran_session_transactions
+SELECT * FROM SYS.dm_clr_appdomains
+SELECT * FROM SYS.dm_db_xtp_gc_cycle_stats
+SELECT * FROM SYS.dm_exec_trigger_stats
+SELECT * FROM SYS.dm_os_memory_pools
+SELECT * FROM SYS.dm_os_latch_stats
+SELECT * FROM SYS.dm_io_backup_tapes
+SELECT * FROM SYS.dm_db_xtp_merge_requests
+SELECT * FROM SYS.dm_resource_governor_workload_groups
+SELECT * FROM SYS.dm_hadr_database_replica_states
+SELECT * FROM SYS.dm_fts_memory_pools
+SELECT * FROM SYS.dm_resource_governor_resource_pool_affinity
+SELECT * FROM SYS.dm_os_sys_info
+SELECT * FROM SYS.dm_tran_locks
+SELECT * FROM SYS.dm_exec_procedure_stats
+SELECT * FROM SYS.dm_hadr_database_replica_cluster_states
+SELECT * FROM SYS.dm_exec_query_transformation_stats
+SELECT * FROM SYS.dm_exec_query_resource_semaphores
+SELECT * FROM SYS.dm_repl_traninfo
+SELECT * FROM SYS.dm_db_missing_index_group_stats
+SELECT * FROM SYS.dm_fts_population_ranges
+SELECT * FROM SYS.dm_os_performance_counters
+SELECT * FROM SYS.dm_os_workers
+SELECT * FROM SYS.dm_xe_session_event_actions
+SELECT * FROM SYS.dm_db_script_level
+SELECT * FROM SYS.dm_server_audit_status
+SELECT * FROM SYS.dm_io_cluster_shared_drives
+SELECT * FROM SYS.dm_os_tasks
+SELECT * FROM SYS.dm_db_fts_index_physical_stats
+SELECT * FROM SYS.dm_xe_packages
+SELECT * FROM SYS.dm_logpool_stats
+SELECT * FROM SYS.dm_os_memory_nodes
+SELECT * FROM SYS.dm_tran_version_store
+SELECT * FROM SYS.dm_os_windows_info
+SELECT * FROM SYS.dm_os_cluster_nodes
+SELECT * FROM SYS.dm_xtp_gc_queue_stats
+SELECT * FROM SYS.dm_os_process_memory
+SELECT * FROM SYS.dm_xe_objects
+SELECT * FROM SYS.dm_xe_object_columns
+SELECT * FROM SYS.dm_db_xtp_transactions
+SELECT * FROM SYS.dm_clr_loaded_assemblies
+SELECT * FROM SYS.dm_db_index_usage_stats
+
+
+   /* DMV to list all empty tables in your database. */
+
+   Use AdventureWorks2012
+
+   go
+
+
+   ;WITH Empty AS     
+   (
+    SELECT 
+ OBJECT_NAME(OBJECT_ID) [Table],
+ SUM(row_count) [Records]
+    FROM 
+ sys.dm_db_partition_stats      
+    WHERE 
+ index_id = 0 OR index_id = 1      
+    GROUP BY 
+ OBJECT_ID      
+   )      
+
+   SELECT [Table],Records 
+   FROM [Empty]      
+   WHERE [Records] = 0
+
+/*
+dmvs for indexes, slow running quieries, missing indexes, statistice, 
+counters, cpu, memoru, I/), physical disk sessions, users, security, 
+database info 
+*/
+
+
+Select * from sys.dm_exec_connections
+Select * from sys.dm_exec_sessions
+Select * from sys.dm_exec_requests
+Select * from sys.dm_db_index_usage_stats
+Select * from sys.dm_db_missing_index_group_stats
+Select * from sys.dm_os_performance_counters
+select * from sys.dm_os_sys_memory
+
+
+
+--allow the DBA to identify where the bulk of the connections originate
+
+SELECT dec.client_net_address ,
+des.program_name ,
+des.host_name ,
+--des.login_name  
+COUNT(dec.session_id) AS connection_count
+FROM sys.dm_exec_sessions AS des
+INNER JOIN sys.dm_exec_connections AS dec
+ON des.session_id = dec.session_id
+-- WHERE LEFT(des.host_name, 2) = 'WK'
+GROUP BY dec.client_net_address ,
+des.program_name ,
+des.host_name
+-- des.login_name
+-- HAVING COUNT(dec.session_id) > 1
+ORDER BY des.program_name,
+dec.client_net_address ;
+
+
+--who are directly connected to the SQL Server instance
+
+SELECT dec.client_net_address ,
+des.host_name ,
+dest.text
+FROM sys.dm_exec_sessions des
+INNER JOIN sys.dm_exec_connections dec
+ON des.session_id = dec.session_id
+CROSS APPLY sys.dm_exec_sql_text(dec.most_recent_sql_handle) dest
+WHERE des.program_name LIKE 'Microsoft SQL Server Management Studio%'
+ORDER BY des.program_name ,
+dec.client_net_address
+
+--Find indexes for database
+
+use AdventureWorks2012
+go
+
+SELECT DB_NAME(ddius.[database_id]) AS database_name ,
+OBJECT_NAME(ddius.[object_id], DB_ID('AdventureWorks2012')) --<< replace db name
+AS [object_name] ,
+asi.[name] AS index_name ,
+ddius.user_seeks + ddius.user_scans + ddius.user_lookups AS user_reads
+FROM sys.dm_db_index_usage_stats ddius
+INNER JOIN AdventureWorks2012.sys.indexes asi
+ON ddius.[object_id] = asi.[object_id]
+AND ddius.index_id = asi.index_id ;
+
+--userful DMV for determining usage of index
+
+SELECT OBJECT_NAME(ddius.[object_id], ddius.database_id) AS [object_name] ,
+ddius.index_id ,
+ddius.user_seeks ,
+ddius.user_scans ,
+ddius.user_lookups ,
+ddius.user_seeks + ddius.user_scans + ddius.user_lookups
+AS user_reads ,
+ddius.user_updates AS user_writes ,
+ddius.last_user_scan ,
+ddius.last_user_update
+FROM sys.dm_db_index_usage_stats ddius
+WHERE ddius.database_id > 4 -- filter out system tables
+AND OBJECTPROPERTY(ddius.object_id, 'IsUserTable') = 1
+AND ddius.index_id > 0 -- filter out heaps
+ORDER BY ddius.user_scans DESC
+
+-- List unused indexes
+
+SELECT OBJECT_NAME(i.[object_id]) AS [Table Name] ,
+i.name
+FROM sys.indexes AS i
+INNER JOIN sys.objects AS o ON i.[object_id] = o.[object_id]
+WHERE i.index_id NOT IN ( SELECT ddius.index_id
+FROM sys.dm_db_index_usage_stats AS ddius
+WHERE ddius.[object_id] = i.[object_id]
+AND i.index_id = ddius.index_id
+AND database_id = DB_ID() )
+AND o.[type] = 'U'
+ORDER BY OBJECT_NAME(i.[object_id]) ASC ;
+
+--STOP
+
+--Current Running Transaction
+
+use master 
+SELECT 
+SPID,ER.percent_complete,
+CAST(((DATEDIFF(s,start_time,GetDate()))/3600) as varchar) + ' hour(s), '
++ CAST((DATEDIFF(s,start_time,GetDate())%3600)/60 as varchar) + 'min, '
++ CAST((DATEDIFF(s,start_time,GetDate())%60) as varchar) + ' sec' as running_time,
+CAST((estimated_completion_time/3600000) as varchar) + ' hour(s), '
++ CAST((estimated_completion_time %3600000)/60000 as varchar) + 'min, '
++ CAST((estimated_completion_time %60000)/1000 as varchar) + ' sec' as est_time_to_go,
+DATEADD(second,estimated_completion_time/1000, getdate()) as est_completion_time,
+ER.command,ER.blocking_session_id, SP.DBID,LASTWAITTYPE,
+DB_NAME(SP.DBID) AS DBNAME,
+SUBSTRING(est.text, (ER.statement_start_offset/2)+1,
+((CASE ER.statement_end_offset 
+WHEN -1 THEN DATALENGTH(est.text)
+ELSE ER.statement_end_offset
+END - ER.statement_start_offset)/2) + 1) AS QueryText,
+TEXT,CPU,HOSTNAME,LOGIN_TIME,LOGINAME,
+SP.status,PROGRAM_NAME,NT_DOMAIN, NT_USERNAME
+FROM SYSPROCESSES SP
+INNER JOIN 
+sys.dm_exec_requests ER
+ON sp.spid = ER.session_id
+CROSS APPLY SYS.DM_EXEC_SQL_TEXT(er.sql_handle) EST
+
+
+
+--Run following query to find longest running query using T-SQL
+
+SELECT DISTINCT TOP 3
+t.TEXT QueryName,
+s.execution_count AS ExecutionCount,
+s.max_elapsed_time AS MaxElapsedTime,
+--ISNULL(s.total_elapsed_time / s.execution_count, 0) AS AvgElapsedTime,
+s.creation_time AS LogCreatedOn--,
+--ISNULL(s.execution_count / DATEDIFF(s, s.creation_time, GETDATE()), 0) AS FrequencyPerSec
+FROM sys.dm_exec_query_stats s
+CROSS APPLY sys.dm_exec_sql_text( s.sql_handle ) t
+ORDER BY
+s.max_elapsed_time DESC
+GO
+
+-- Top 5 worst performing Queries 
+
+SELECT 
+TOP 5 obj.name, max_logical_reads, max_elapsed_time 
+FROM 
+sys.dm_exec_query_stats a CROSS APPLY 
+sys.dm_exec_sql_text(sql_handle) hnd INNER JOIN 
+sys.sysobjects obj on hnd.objectid = obj.id 
+ORDER BY 
+max_logical_reads DESC
+
+--TOP 5 CPU-CONSUMING STATEMENTS 
+
+SELECT TOP 5
+qs.total_worker_time/(qs.execution_count*60000000) as [Avg CPU Time in mins],
+qs.execution_count,
+qs.min_worker_time/60000000 as [Min CPU Time in mins],
+--qs.total_worker_time/qs.execution_count,
+SUBSTRING(qt.text,qs.statement_start_offset/2,
+(case when qs.statement_end_offset = -1
+then len(convert(nvarchar(max), qt.text)) * 2
+else qs.statement_end_offset end -qs.statement_start_offset)/2)
+as query_text,
+dbname=db_name(qt.dbid),
+object_name(qt.objectid) as [Object name]
+FROM 
+sys.dm_exec_query_stats qs cross apply 
+sys.dm_exec_sql_text(qs.sql_handle) as qt
+ORDER BY
+[Avg CPU Time in mins] DESC
+
+
+
+********************************************
+
+
+--view all DMVs
+
+SELECT name, type, type_desc
+FROM sys.system_objects
+WHERE name LIKE 'dm_%'
+ORDER BY 2 desc
+
+
+SELECT * FROM SYS.dm_os_memory_allocations               --<< Notice that all DMVs starts with SYS.DM
+SELECT * FROM SYS.dm_db_xtp_nonclustered_index_stats   
+SELECT * FROM SYS.dm_db_mirroring_past_actions
+SELECT * FROM SYS.dm_xe_session_object_columns
+SELECT * FROM SYS.dm_os_loaded_modules
+SELECT * FROM SYS.dm_db_task_space_usage
+SELECT * FROM SYS.dm_os_memory_objects
+SELECT * FROM SYS.dm_audit_class_type_map
+SELECT * FROM SYS.dm_os_schedulers
+SELECT * FROM SYS.dm_os_server_diagnostics_log_configurations
+SELECT * FROM SYS.dm_hadr_instance_node_map
+SELECT * FROM SYS.dm_io_cluster_valid_path_names
+SELECT * FROM SYS.dm_os_dispatcher_pools
+SELECT * FROM SYS.dm_xtp_transaction_stats
+SELECT * FROM SYS.dm_exec_query_profiles
+SELECT * FROM SYS.dm_os_threads
+SELECT * FROM SYS.dm_repl_tranhash
+SELECT * FROM SYS.dm_hadr_cluster
+SELECT * FROM SYS.dm_qn_subscriptions
+SELECT * FROM SYS.dm_db_session_space_usage
+SELECT * FROM SYS.dm_xtp_gc_stats
+SELECT * FROM SYS.dm_exec_query_optimizer_info
+SELECT * FROM SYS.dm_xe_map_values
+SELECT * FROM SYS.dm_db_xtp_index_stats
+SELECT * FROM SYS.dm_tran_top_version_generators
+SELECT * FROM SYS.dm_fts_fdhosts
+SELECT * FROM SYS.dm_xe_sessions
+SELECT * FROM SYS.dm_db_log_space_usage
+SELECT * FROM SYS.dm_hadr_name_id_map
+SELECT * FROM SYS.dm_os_waiting_tasks
+SELECT * FROM SYS.dm_exec_background_job_queue
+SELECT * FROM SYS.dm_resource_governor_resource_pool_volumes
+SELECT * FROM SYS.dm_os_hosts
+SELECT * FROM SYS.dm_os_memory_brokers
+SELECT * FROM SYS.dm_exec_requests
+SELECT * FROM SYS.dm_tran_commit_table
+SELECT * FROM SYS.dm_db_missing_index_details
+SELECT * FROM SYS.dm_clr_properties
+SELECT * FROM SYS.dm_os_sublatches
+SELECT * FROM SYS.dm_os_buffer_pool_extension_configuration
+SELECT * FROM SYS.dm_exec_query_memory_grants
+SELECT * FROM SYS.dm_fts_outstanding_batches
+SELECT * FROM SYS.dm_logpool_hashentries
+SELECT * FROM SYS.dm_os_wait_stats
+SELECT * FROM SYS.dm_os_memory_node_access_stats
+SELECT * FROM SYS.dm_os_spinlock_stats
+SELECT * FROM SYS.dm_database_encryption_keys
+SELECT * FROM SYS.dm_db_xtp_checkpoint_stats
+SELECT * FROM SYS.dm_hadr_availability_replica_states
+SELECT * FROM SYS.dm_broker_connections
+SELECT * FROM SYS.dm_db_mirroring_auto_page_repair
+SELECT * FROM SYS.dm_server_registry
+SELECT * FROM SYS.dm_tran_current_snapshot
+SELECT * FROM SYS.dm_os_dispatchers
+SELECT * FROM SYS.dm_os_stacks
+SELECT * FROM SYS.dm_db_xtp_object_stats
+SELECT * FROM SYS.dm_filestream_non_transacted_handles
+SELECT * FROM SYS.dm_xe_session_targets
+SELECT * FROM SYS.dm_fts_memory_buffers
+SELECT * FROM SYS.dm_fts_index_population
+SELECT * FROM SYS.dm_tran_current_transaction
+SELECT * FROM SYS.dm_os_cluster_properties
+SELECT * FROM SYS.dm_os_child_instances
+SELECT * FROM SYS.dm_exec_connections
+SELECT * FROM SYS.dm_server_memory_dumps
+SELECT * FROM SYS.dm_xtp_threads
+SELECT * FROM SYS.dm_exec_background_job_queue_stats
+SELECT * FROM SYS.dm_os_memory_broker_clerks
+SELECT * FROM SYS.dm_filestream_file_io_handles
+SELECT * FROM SYS.dm_xtp_transaction_recent_rows
+SELECT * FROM SYS.dm_hadr_availability_replica_cluster_nodes
+SELECT * FROM SYS.dm_fts_active_catalogs
+SELECT * FROM SYS.dm_tran_database_transactions
+SELECT * FROM SYS.dm_filestream_file_io_requests
+SELECT * FROM SYS.dm_cdc_log_scan_sessions
+SELECT * FROM SYS.dm_os_memory_cache_clock_hands
+SELECT * FROM SYS.dm_repl_schemas
+SELECT * FROM SYS.dm_db_mirroring_connections
+SELECT * FROM SYS.dm_audit_actions
+SELECT * FROM SYS.dm_hadr_availability_group_states
+SELECT * FROM SYS.dm_os_ring_buffers
+SELECT * FROM SYS.dm_db_xtp_table_memory_stats
+SELECT * FROM SYS.dm_db_missing_index_groups
+SELECT * FROM SYS.dm_hadr_cluster_members
+SELECT * FROM SYS.dm_db_uncontained_entities
+SELECT * FROM SYS.dm_exec_cached_plans
+SELECT * FROM SYS.dm_hadr_availability_replica_cluster_states
+SELECT * FROM SYS.dm_exec_sessions
+SELECT * FROM SYS.dm_os_memory_clerks
+SELECT * FROM SYS.dm_hadr_auto_page_repair
+SELECT * FROM SYS.dm_db_xtp_memory_consumers
+SELECT * FROM SYS.dm_repl_articles
+SELECT * FROM SYS.dm_xe_session_events
+SELECT * FROM SYS.dm_broker_forwarded_messages
+SELECT * FROM SYS.dm_resource_governor_resource_pools
+SELECT * FROM SYS.dm_db_xtp_checkpoint_files
+SELECT * FROM SYS.dm_db_partition_stats
+SELECT * FROM SYS.dm_io_pending_io_requests
+SELECT * FROM SYS.dm_xtp_system_memory_consumers
+SELECT * FROM SYS.dm_hadr_cluster_networks
+SELECT * FROM SYS.dm_os_nodes
+SELECT * FROM SYS.dm_tcp_listener_states
+SELECT * FROM SYS.dm_os_memory_cache_entries
+SELECT * FROM SYS.dm_os_virtual_address_dump
+SELECT * FROM SYS.dm_os_memory_cache_hash_tables
+SELECT * FROM SYS.dm_cdc_errors
+SELECT * FROM SYS.dm_resource_governor_configuration
+SELECT * FROM SYS.dm_exec_query_stats
+SELECT * FROM SYS.dm_fts_semantic_similarity_population
+SELECT * FROM SYS.dm_clr_tasks
+SELECT * FROM SYS.dm_db_xtp_hash_index_stats
+SELECT * FROM SYS.dm_os_worker_local_storage
+SELECT * FROM SYS.dm_db_persisted_sku_features
+SELECT * FROM SYS.dm_os_sys_memory
+SELECT * FROM SYS.dm_cryptographic_provider_properties
+SELECT * FROM SYS.dm_tran_transactions_snapshot
+SELECT * FROM SYS.dm_os_buffer_descriptors
+SELECT * FROM SYS.dm_tran_active_snapshot_database_transactions
+SELECT * FROM SYS.dm_server_services
+SELECT * FROM SYS.dm_tran_active_transactions
+SELECT * FROM SYS.dm_db_file_space_usage
+SELECT * FROM SYS.dm_broker_activated_tasks
+SELECT * FROM SYS.dm_broker_queue_monitors
+SELECT * FROM SYS.dm_os_memory_cache_counters
+SELECT * FROM SYS.dm_tran_session_transactions
+SELECT * FROM SYS.dm_clr_appdomains
+SELECT * FROM SYS.dm_db_xtp_gc_cycle_stats
+SELECT * FROM SYS.dm_exec_trigger_stats
+SELECT * FROM SYS.dm_os_memory_pools
+SELECT * FROM SYS.dm_os_latch_stats
+SELECT * FROM SYS.dm_io_backup_tapes
+SELECT * FROM SYS.dm_db_xtp_merge_requests
+SELECT * FROM SYS.dm_resource_governor_workload_groups
+SELECT * FROM SYS.dm_hadr_database_replica_states
+SELECT * FROM SYS.dm_fts_memory_pools
+SELECT * FROM SYS.dm_resource_governor_resource_pool_affinity
+SELECT * FROM SYS.dm_os_sys_info
+SELECT * FROM SYS.dm_tran_locks
+SELECT * FROM SYS.dm_exec_procedure_stats
+SELECT * FROM SYS.dm_hadr_database_replica_cluster_states
+SELECT * FROM SYS.dm_exec_query_transformation_stats
+SELECT * FROM SYS.dm_exec_query_resource_semaphores
+SELECT * FROM SYS.dm_repl_traninfo
+SELECT * FROM SYS.dm_db_missing_index_group_stats
+SELECT * FROM SYS.dm_fts_population_ranges
+SELECT * FROM SYS.dm_os_performance_counters
+SELECT * FROM SYS.dm_os_workers
+SELECT * FROM SYS.dm_xe_session_event_actions
+SELECT * FROM SYS.dm_db_script_level
+SELECT * FROM SYS.dm_server_audit_status
+SELECT * FROM SYS.dm_io_cluster_shared_drives
+SELECT * FROM SYS.dm_os_tasks
+SELECT * FROM SYS.dm_db_fts_index_physical_stats
+SELECT * FROM SYS.dm_xe_packages
+SELECT * FROM SYS.dm_logpool_stats
+SELECT * FROM SYS.dm_os_memory_nodes
+SELECT * FROM SYS.dm_tran_version_store
+SELECT * FROM SYS.dm_os_windows_info
+SELECT * FROM SYS.dm_os_cluster_nodes
+SELECT * FROM SYS.dm_xtp_gc_queue_stats
+SELECT * FROM SYS.dm_os_process_memory
+SELECT * FROM SYS.dm_xe_objects
+SELECT * FROM SYS.dm_xe_object_columns
+SELECT * FROM SYS.dm_db_xtp_transactions
+SELECT * FROM SYS.dm_clr_loaded_assemblies
+SELECT * FROM SYS.dm_db_index_usage_stats
+
+
+   /* DMV to list all empty tables in your database. */
+
+   Use AdventureWorks2012
+
+   go
+
+
+   ;WITH Empty AS     
+   (
+    SELECT 
+ OBJECT_NAME(OBJECT_ID) [Table],
+ SUM(row_count) [Records]
+    FROM 
+ sys.dm_db_partition_stats      
+    WHERE 
+ index_id = 0 OR index_id = 1      
+    GROUP BY 
+ OBJECT_ID      
+   )      
+
+   SELECT [Table],Records 
+   FROM [Empty]      
+   WHERE [Records] = 0
+
+/*
+dmvs for indexes, slow running quieries, missing indexes, statistice, 
+counters, cpu, memory, I/), physical disk sessions, users, security, 
+database info 
+*/
+
+
+Select * from sys.dm_exec_connections
+Select * from sys.dm_exec_sessions
+Select * from sys.dm_exec_requests
+Select * from sys.dm_db_index_usage_stats
+Select * from sys.dm_db_missing_index_group_stats
+Select * from sys.dm_os_performance_counters
+select * from sys.dm_os_sys_memory
+
+
+
+--allow the DBA to identify where the bulk of the connections originat
+
+SELECT dec.client_net_address ,
+des.program_name ,
+des.host_name ,
+--des.login_name  
+COUNT(dec.session_id) AS connection_count
+FROM sys.dm_exec_sessions AS des
+INNER JOIN sys.dm_exec_connections AS dec
+ON des.session_id = dec.session_id
+-- WHERE LEFT(des.host_name, 2) = 'WK'
+GROUP BY dec.client_net_address ,
+des.program_name ,
+des.host_name
+-- des.login_name
+-- HAVING COUNT(dec.session_id) > 1
+ORDER BY des.program_name,
+dec.client_net_address ;
+
+
+--who are directly connected to the SQL Server instance
+
+SELECT dec.client_net_address ,
+des.host_name ,
+dest.text
+FROM sys.dm_exec_sessions des
+INNER JOIN sys.dm_exec_connections dec
+ON des.session_id = dec.session_id
+CROSS APPLY sys.dm_exec_sql_text(dec.most_recent_sql_handle) dest
+WHERE des.program_name LIKE 'Microsoft SQL Server Management Studio%'
+ORDER BY des.program_name ,
+dec.client_net_address
+
+--Find indexes for database
+
+use AdventureWorks2012
+go
+
+SELECT DB_NAME(ddius.[database_id]) AS database_name ,
+OBJECT_NAME(ddius.[object_id], DB_ID('AdventureWorks2012')) --<< replace db name
+AS [object_name] ,
+asi.[name] AS index_name ,
+ddius.user_seeks + ddius.user_scans + ddius.user_lookups AS user_reads
+FROM sys.dm_db_index_usage_stats ddius
+INNER JOIN AdventureWorks2012.sys.indexes asi
+ON ddius.[object_id] = asi.[object_id]
+AND ddius.index_id = asi.index_id ;
+
+--userful DMV for determining usage of index
+
+SELECT OBJECT_NAME(ddius.[object_id], ddius.database_id) AS [object_name] ,
+ddius.index_id ,
+ddius.user_seeks ,
+ddius.user_scans ,
+ddius.user_lookups ,
+ddius.user_seeks + ddius.user_scans + ddius.user_lookups
+AS user_reads ,
+ddius.user_updates AS user_writes ,
+ddius.last_user_scan ,
+ddius.last_user_update
+FROM sys.dm_db_index_usage_stats ddius
+WHERE ddius.database_id > 4 -- filter out system tables
+AND OBJECTPROPERTY(ddius.object_id, 'IsUserTable') = 1
+AND ddius.index_id > 0 -- filter out heaps
+ORDER BY ddius.user_scans DESC
+
+-- List unused indexes
+
+SELECT OBJECT_NAME(i.[object_id]) AS [Table Name] ,
+i.name
+FROM sys.indexes AS i
+INNER JOIN sys.objects AS o ON i.[object_id] = o.[object_id]
+WHERE i.index_id NOT IN ( SELECT ddius.index_id
+FROM sys.dm_db_index_usage_stats AS ddius
+WHERE ddius.[object_id] = i.[object_id]
+AND i.index_id = ddius.index_id
+AND database_id = DB_ID() )
+AND o.[type] = 'U'
+ORDER BY OBJECT_NAME(i.[object_id]) ASC ;
 
 ----------------------------------------------------------------------------
 
