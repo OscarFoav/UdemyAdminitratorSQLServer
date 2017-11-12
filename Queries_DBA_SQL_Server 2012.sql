@@ -4582,381 +4582,6 @@ The DMVs are broken down into the following categories:
 https://msdn.microsoft.com/en-us/library/ms188754.aspx
 A few common examples of DMVs:
 
---view all DMVs
-
-SELECT name, type, type_desc
-FROM sys.system_objects
-WHERE name LIKE 'dm_%'
-ORDER BY 2 desc
-
-
-SELECT * FROM SYS.dm_os_memory_allocations               --<< Notice that all DMVs starts with SYS.DM
-SELECT * FROM SYS.dm_db_xtp_nonclustered_index_stats   
-SELECT * FROM SYS.dm_db_mirroring_past_actions
-SELECT * FROM SYS.dm_xe_session_object_columns
-SELECT * FROM SYS.dm_os_loaded_modules
-SELECT * FROM SYS.dm_db_task_space_usage
-SELECT * FROM SYS.dm_os_memory_objects
-SELECT * FROM SYS.dm_audit_class_type_map
-SELECT * FROM SYS.dm_os_schedulers
-SELECT * FROM SYS.dm_os_server_diagnostics_log_configurations
-SELECT * FROM SYS.dm_hadr_instance_node_map
-SELECT * FROM SYS.dm_io_cluster_valid_path_names
-SELECT * FROM SYS.dm_os_dispatcher_pools
-SELECT * FROM SYS.dm_xtp_transaction_stats
-SELECT * FROM SYS.dm_exec_query_profiles
-SELECT * FROM SYS.dm_os_threads
-SELECT * FROM SYS.dm_repl_tranhash
-SELECT * FROM SYS.dm_hadr_cluster
-SELECT * FROM SYS.dm_qn_subscriptions
-SELECT * FROM SYS.dm_db_session_space_usage
-SELECT * FROM SYS.dm_xtp_gc_stats
-SELECT * FROM SYS.dm_exec_query_optimizer_info
-SELECT * FROM SYS.dm_xe_map_values
-SELECT * FROM SYS.dm_db_xtp_index_stats
-SELECT * FROM SYS.dm_tran_top_version_generators
-SELECT * FROM SYS.dm_fts_fdhosts
-SELECT * FROM SYS.dm_xe_sessions
-SELECT * FROM SYS.dm_db_log_space_usage
-SELECT * FROM SYS.dm_hadr_name_id_map
-SELECT * FROM SYS.dm_os_waiting_tasks
-SELECT * FROM SYS.dm_exec_background_job_queue
-SELECT * FROM SYS.dm_resource_governor_resource_pool_volumes
-SELECT * FROM SYS.dm_os_hosts
-SELECT * FROM SYS.dm_os_memory_brokers
-SELECT * FROM SYS.dm_exec_requests
-SELECT * FROM SYS.dm_tran_commit_table
-SELECT * FROM SYS.dm_db_missing_index_details
-SELECT * FROM SYS.dm_clr_properties
-SELECT * FROM SYS.dm_os_sublatches
-SELECT * FROM SYS.dm_os_buffer_pool_extension_configuration
-SELECT * FROM SYS.dm_exec_query_memory_grants
-SELECT * FROM SYS.dm_fts_outstanding_batches
-SELECT * FROM SYS.dm_logpool_hashentries
-SELECT * FROM SYS.dm_os_wait_stats
-SELECT * FROM SYS.dm_os_memory_node_access_stats
-SELECT * FROM SYS.dm_os_spinlock_stats
-SELECT * FROM SYS.dm_database_encryption_keys
-SELECT * FROM SYS.dm_db_xtp_checkpoint_stats
-SELECT * FROM SYS.dm_hadr_availability_replica_states
-SELECT * FROM SYS.dm_broker_connections
-SELECT * FROM SYS.dm_db_mirroring_auto_page_repair
-SELECT * FROM SYS.dm_server_registry
-SELECT * FROM SYS.dm_tran_current_snapshot
-SELECT * FROM SYS.dm_os_dispatchers
-SELECT * FROM SYS.dm_os_stacks
-SELECT * FROM SYS.dm_db_xtp_object_stats
-SELECT * FROM SYS.dm_filestream_non_transacted_handles
-SELECT * FROM SYS.dm_xe_session_targets
-SELECT * FROM SYS.dm_fts_memory_buffers
-SELECT * FROM SYS.dm_fts_index_population
-SELECT * FROM SYS.dm_tran_current_transaction
-SELECT * FROM SYS.dm_os_cluster_properties
-SELECT * FROM SYS.dm_os_child_instances
-SELECT * FROM SYS.dm_exec_connections
-SELECT * FROM SYS.dm_server_memory_dumps
-SELECT * FROM SYS.dm_xtp_threads
-SELECT * FROM SYS.dm_exec_background_job_queue_stats
-SELECT * FROM SYS.dm_os_memory_broker_clerks
-SELECT * FROM SYS.dm_filestream_file_io_handles
-SELECT * FROM SYS.dm_xtp_transaction_recent_rows
-SELECT * FROM SYS.dm_hadr_availability_replica_cluster_nodes
-SELECT * FROM SYS.dm_fts_active_catalogs
-SELECT * FROM SYS.dm_tran_database_transactions
-SELECT * FROM SYS.dm_filestream_file_io_requests
-SELECT * FROM SYS.dm_cdc_log_scan_sessions
-SELECT * FROM SYS.dm_os_memory_cache_clock_hands
-SELECT * FROM SYS.dm_repl_schemas
-SELECT * FROM SYS.dm_db_mirroring_connections
-SELECT * FROM SYS.dm_audit_actions
-SELECT * FROM SYS.dm_hadr_availability_group_states
-SELECT * FROM SYS.dm_os_ring_buffers
-SELECT * FROM SYS.dm_db_xtp_table_memory_stats
-SELECT * FROM SYS.dm_db_missing_index_groups
-SELECT * FROM SYS.dm_hadr_cluster_members
-SELECT * FROM SYS.dm_db_uncontained_entities
-SELECT * FROM SYS.dm_exec_cached_plans
-SELECT * FROM SYS.dm_hadr_availability_replica_cluster_states
-SELECT * FROM SYS.dm_exec_sessions
-SELECT * FROM SYS.dm_os_memory_clerks
-SELECT * FROM SYS.dm_hadr_auto_page_repair
-SELECT * FROM SYS.dm_db_xtp_memory_consumers
-SELECT * FROM SYS.dm_repl_articles
-SELECT * FROM SYS.dm_xe_session_events
-SELECT * FROM SYS.dm_broker_forwarded_messages
-SELECT * FROM SYS.dm_resource_governor_resource_pools
-SELECT * FROM SYS.dm_db_xtp_checkpoint_files
-SELECT * FROM SYS.dm_db_partition_stats
-SELECT * FROM SYS.dm_io_pending_io_requests
-SELECT * FROM SYS.dm_xtp_system_memory_consumers
-SELECT * FROM SYS.dm_hadr_cluster_networks
-SELECT * FROM SYS.dm_os_nodes
-SELECT * FROM SYS.dm_tcp_listener_states
-SELECT * FROM SYS.dm_os_memory_cache_entries
-SELECT * FROM SYS.dm_os_virtual_address_dump
-SELECT * FROM SYS.dm_os_memory_cache_hash_tables
-SELECT * FROM SYS.dm_cdc_errors
-SELECT * FROM SYS.dm_resource_governor_configuration
-SELECT * FROM SYS.dm_exec_query_stats
-SELECT * FROM SYS.dm_fts_semantic_similarity_population
-SELECT * FROM SYS.dm_clr_tasks
-SELECT * FROM SYS.dm_db_xtp_hash_index_stats
-SELECT * FROM SYS.dm_os_worker_local_storage
-SELECT * FROM SYS.dm_db_persisted_sku_features
-SELECT * FROM SYS.dm_os_sys_memory
-SELECT * FROM SYS.dm_cryptographic_provider_properties
-SELECT * FROM SYS.dm_tran_transactions_snapshot
-SELECT * FROM SYS.dm_os_buffer_descriptors
-SELECT * FROM SYS.dm_tran_active_snapshot_database_transactions
-SELECT * FROM SYS.dm_server_services
-SELECT * FROM SYS.dm_tran_active_transactions
-SELECT * FROM SYS.dm_db_file_space_usage
-SELECT * FROM SYS.dm_broker_activated_tasks
-SELECT * FROM SYS.dm_broker_queue_monitors
-SELECT * FROM SYS.dm_os_memory_cache_counters
-SELECT * FROM SYS.dm_tran_session_transactions
-SELECT * FROM SYS.dm_clr_appdomains
-SELECT * FROM SYS.dm_db_xtp_gc_cycle_stats
-SELECT * FROM SYS.dm_exec_trigger_stats
-SELECT * FROM SYS.dm_os_memory_pools
-SELECT * FROM SYS.dm_os_latch_stats
-SELECT * FROM SYS.dm_io_backup_tapes
-SELECT * FROM SYS.dm_db_xtp_merge_requests
-SELECT * FROM SYS.dm_resource_governor_workload_groups
-SELECT * FROM SYS.dm_hadr_database_replica_states
-SELECT * FROM SYS.dm_fts_memory_pools
-SELECT * FROM SYS.dm_resource_governor_resource_pool_affinity
-SELECT * FROM SYS.dm_os_sys_info
-SELECT * FROM SYS.dm_tran_locks
-SELECT * FROM SYS.dm_exec_procedure_stats
-SELECT * FROM SYS.dm_hadr_database_replica_cluster_states
-SELECT * FROM SYS.dm_exec_query_transformation_stats
-SELECT * FROM SYS.dm_exec_query_resource_semaphores
-SELECT * FROM SYS.dm_repl_traninfo
-SELECT * FROM SYS.dm_db_missing_index_group_stats
-SELECT * FROM SYS.dm_fts_population_ranges
-SELECT * FROM SYS.dm_os_performance_counters
-SELECT * FROM SYS.dm_os_workers
-SELECT * FROM SYS.dm_xe_session_event_actions
-SELECT * FROM SYS.dm_db_script_level
-SELECT * FROM SYS.dm_server_audit_status
-SELECT * FROM SYS.dm_io_cluster_shared_drives
-SELECT * FROM SYS.dm_os_tasks
-SELECT * FROM SYS.dm_db_fts_index_physical_stats
-SELECT * FROM SYS.dm_xe_packages
-SELECT * FROM SYS.dm_logpool_stats
-SELECT * FROM SYS.dm_os_memory_nodes
-SELECT * FROM SYS.dm_tran_version_store
-SELECT * FROM SYS.dm_os_windows_info
-SELECT * FROM SYS.dm_os_cluster_nodes
-SELECT * FROM SYS.dm_xtp_gc_queue_stats
-SELECT * FROM SYS.dm_os_process_memory
-SELECT * FROM SYS.dm_xe_objects
-SELECT * FROM SYS.dm_xe_object_columns
-SELECT * FROM SYS.dm_db_xtp_transactions
-SELECT * FROM SYS.dm_clr_loaded_assemblies
-SELECT * FROM SYS.dm_db_index_usage_stats
-
-
-   /* DMV to list all empty tables in your database. */
-
-   Use AdventureWorks2012
-
-   go
-
-
-   ;WITH Empty AS     
-   (
-    SELECT 
- OBJECT_NAME(OBJECT_ID) [Table],
- SUM(row_count) [Records]
-    FROM 
- sys.dm_db_partition_stats      
-    WHERE 
- index_id = 0 OR index_id = 1      
-    GROUP BY 
- OBJECT_ID      
-   )      
-
-   SELECT [Table],Records 
-   FROM [Empty]      
-   WHERE [Records] = 0
-
-/*
-dmvs for indexes, slow running quieries, missing indexes, statistice, 
-counters, cpu, memoru, I/), physical disk sessions, users, security, 
-database info 
-*/
-
-
-Select * from sys.dm_exec_connections
-Select * from sys.dm_exec_sessions
-Select * from sys.dm_exec_requests
-Select * from sys.dm_db_index_usage_stats
-Select * from sys.dm_db_missing_index_group_stats
-Select * from sys.dm_os_performance_counters
-select * from sys.dm_os_sys_memory
-
-
-
---allow the DBA to identify where the bulk of the connections originate
-
-SELECT dec.client_net_address ,
-des.program_name ,
-des.host_name ,
---des.login_name  
-COUNT(dec.session_id) AS connection_count
-FROM sys.dm_exec_sessions AS des
-INNER JOIN sys.dm_exec_connections AS dec
-ON des.session_id = dec.session_id
--- WHERE LEFT(des.host_name, 2) = 'WK'
-GROUP BY dec.client_net_address ,
-des.program_name ,
-des.host_name
--- des.login_name
--- HAVING COUNT(dec.session_id) > 1
-ORDER BY des.program_name,
-dec.client_net_address ;
-
-
---who are directly connected to the SQL Server instance
-
-SELECT dec.client_net_address ,
-des.host_name ,
-dest.text
-FROM sys.dm_exec_sessions des
-INNER JOIN sys.dm_exec_connections dec
-ON des.session_id = dec.session_id
-CROSS APPLY sys.dm_exec_sql_text(dec.most_recent_sql_handle) dest
-WHERE des.program_name LIKE 'Microsoft SQL Server Management Studio%'
-ORDER BY des.program_name ,
-dec.client_net_address
-
---Find indexes for database
-
-use AdventureWorks2012
-go
-
-SELECT DB_NAME(ddius.[database_id]) AS database_name ,
-OBJECT_NAME(ddius.[object_id], DB_ID('AdventureWorks2012')) --<< replace db name
-AS [object_name] ,
-asi.[name] AS index_name ,
-ddius.user_seeks + ddius.user_scans + ddius.user_lookups AS user_reads
-FROM sys.dm_db_index_usage_stats ddius
-INNER JOIN AdventureWorks2012.sys.indexes asi
-ON ddius.[object_id] = asi.[object_id]
-AND ddius.index_id = asi.index_id ;
-
---userful DMV for determining usage of index
-
-SELECT OBJECT_NAME(ddius.[object_id], ddius.database_id) AS [object_name] ,
-ddius.index_id ,
-ddius.user_seeks ,
-ddius.user_scans ,
-ddius.user_lookups ,
-ddius.user_seeks + ddius.user_scans + ddius.user_lookups
-AS user_reads ,
-ddius.user_updates AS user_writes ,
-ddius.last_user_scan ,
-ddius.last_user_update
-FROM sys.dm_db_index_usage_stats ddius
-WHERE ddius.database_id > 4 -- filter out system tables
-AND OBJECTPROPERTY(ddius.object_id, 'IsUserTable') = 1
-AND ddius.index_id > 0 -- filter out heaps
-ORDER BY ddius.user_scans DESC
-
--- List unused indexes
-
-SELECT OBJECT_NAME(i.[object_id]) AS [Table Name] ,
-i.name
-FROM sys.indexes AS i
-INNER JOIN sys.objects AS o ON i.[object_id] = o.[object_id]
-WHERE i.index_id NOT IN ( SELECT ddius.index_id
-FROM sys.dm_db_index_usage_stats AS ddius
-WHERE ddius.[object_id] = i.[object_id]
-AND i.index_id = ddius.index_id
-AND database_id = DB_ID() )
-AND o.[type] = 'U'
-ORDER BY OBJECT_NAME(i.[object_id]) ASC ;
-
---STOP
-
---Current Running Transaction
-
-use master 
-SELECT 
-SPID,ER.percent_complete,
-CAST(((DATEDIFF(s,start_time,GetDate()))/3600) as varchar) + ' hour(s), '
-+ CAST((DATEDIFF(s,start_time,GetDate())%3600)/60 as varchar) + 'min, '
-+ CAST((DATEDIFF(s,start_time,GetDate())%60) as varchar) + ' sec' as running_time,
-CAST((estimated_completion_time/3600000) as varchar) + ' hour(s), '
-+ CAST((estimated_completion_time %3600000)/60000 as varchar) + 'min, '
-+ CAST((estimated_completion_time %60000)/1000 as varchar) + ' sec' as est_time_to_go,
-DATEADD(second,estimated_completion_time/1000, getdate()) as est_completion_time,
-ER.command,ER.blocking_session_id, SP.DBID,LASTWAITTYPE,
-DB_NAME(SP.DBID) AS DBNAME,
-SUBSTRING(est.text, (ER.statement_start_offset/2)+1,
-((CASE ER.statement_end_offset 
-WHEN -1 THEN DATALENGTH(est.text)
-ELSE ER.statement_end_offset
-END - ER.statement_start_offset)/2) + 1) AS QueryText,
-TEXT,CPU,HOSTNAME,LOGIN_TIME,LOGINAME,
-SP.status,PROGRAM_NAME,NT_DOMAIN, NT_USERNAME
-FROM SYSPROCESSES SP
-INNER JOIN 
-sys.dm_exec_requests ER
-ON sp.spid = ER.session_id
-CROSS APPLY SYS.DM_EXEC_SQL_TEXT(er.sql_handle) EST
-
-
-
---Run following query to find longest running query using T-SQL
-
-SELECT DISTINCT TOP 3
-t.TEXT QueryName,
-s.execution_count AS ExecutionCount,
-s.max_elapsed_time AS MaxElapsedTime,
---ISNULL(s.total_elapsed_time / s.execution_count, 0) AS AvgElapsedTime,
-s.creation_time AS LogCreatedOn--,
---ISNULL(s.execution_count / DATEDIFF(s, s.creation_time, GETDATE()), 0) AS FrequencyPerSec
-FROM sys.dm_exec_query_stats s
-CROSS APPLY sys.dm_exec_sql_text( s.sql_handle ) t
-ORDER BY
-s.max_elapsed_time DESC
-GO
-
--- Top 5 worst performing Queries 
-
-SELECT 
-TOP 5 obj.name, max_logical_reads, max_elapsed_time 
-FROM 
-sys.dm_exec_query_stats a CROSS APPLY 
-sys.dm_exec_sql_text(sql_handle) hnd INNER JOIN 
-sys.sysobjects obj on hnd.objectid = obj.id 
-ORDER BY 
-max_logical_reads DESC
-
---TOP 5 CPU-CONSUMING STATEMENTS 
-
-SELECT TOP 5
-qs.total_worker_time/(qs.execution_count*60000000) as [Avg CPU Time in mins],
-qs.execution_count,
-qs.min_worker_time/60000000 as [Min CPU Time in mins],
---qs.total_worker_time/qs.execution_count,
-SUBSTRING(qt.text,qs.statement_start_offset/2,
-(case when qs.statement_end_offset = -1
-then len(convert(nvarchar(max), qt.text)) * 2
-else qs.statement_end_offset end -qs.statement_start_offset)/2)
-as query_text,
-dbname=db_name(qt.dbid),
-object_name(qt.objectid) as [Object name]
-FROM 
-sys.dm_exec_query_stats qs cross apply 
-sys.dm_exec_sql_text(qs.sql_handle) as qt
-ORDER BY
-[Avg CPU Time in mins] DESC
-
-
 
 ********************************************
 
@@ -5261,17 +4886,1201 @@ ORDER BY OBJECT_NAME(i.[object_id]) ASC ;
 ----------------------------------------------------------------------------
 
 
-----------------------------------------------------------------------------
+Locks, Blocking, and Deadlocks
+
+What is the purpose of locks?
+•	Applications use database locks to control data integrity in multiuser concurrency situations and are part of the SQL Server internals.  Locks prevent data from being modified by two simultaneous sessions.  In a normal server environment, infrequent blocking locks are acceptable.  Blocking is not the same thing as a deadlock.
+•	A certain amount of blocking is normal and unavoidable. 
+
+What are locks?
+•	A lock is a placed on an object (row, page, extent, table, database) by the SQL Server when any connection access the same piece of data concurrently
+What is blocking
+•	Blocking occurs when one session has a lock on an object and thus causes another session to wait in a holding queue until the current session is entirely done with the resources
+What is a deadlock?
+•	A deadlocks occur when two separate transactions (T#1 and T#2) have exclusive locks on objects and at the same time are trying to update or access each other’s objects.
+What causes locks, blocking and deadlocks?
+•	Poor database design can cause crippling database lock contention 
+•	Poor indexing strategy
+•	Query implementation problem
+•	Tables are not completely normalized
+•	Optimize Transact-SQL code
+
+Ways to monitor lock, deadlocks and blocking
+•	sp_lock
+•	sp_who2 sproc
+•	Activity Monitor 
+•	SQL Profiler
+•	Performance monitor
+Ways to avoid blocking and deadlocks
+•	Use clustered indexes on high-usage tables
+•	Break long transactions up into many shorter transactions. 
+•	Make sure that UPDATE and DELETE statements use an existing index
+•	If your application’s code allows a running query to be cancelled, it is important that the code also roll back the transaction. 
+The most common lock modes 
+•	Exclusive locks (X)
+•	Shared locks (S)
+•	Update locks (U)
+•	Intent locks (I)
+•	Schema locks (two types, SCH-M and SCH-S)
+•	Bulk Update locks (BU)
+
+•	Exclusive lock (X) is placed on a database object whenever it is updated with an INSERT or UPDATE statement
+•	The shared locks (S) is put to a database object whenever it is being read (using the SELECT statement
+•	Update lock (U), which can be thought of as an in-between mode between shared and exclusive locks. The main purpose of the update lock is to prevent deadlocks where multiple users simultaneously try to update data
+•	Intent locks are used to indicate that a certain lock will be later placed on a certain database object. Intent locks are used because locks can form hierarchies
+•	Schema locks (SCH-M and SCH-S) are used to prevent changes to object structure, bulk update locks (BU) are used when updating or inserting multiple rows using a bulk update, 
+•	Key-range locks (R) are used to lock ranges of keys in an index
+•	Because maintaining locks can be an expensive operation performance-wise, SQL Server supports a feature called multigranular locking. This means that locks can be placed on different levels, depending on the situation. 
+
+What is the sign that blocking and deadlocks are occurring: The USER will tell you!!!
+Anytime a query of any type, whether it is a SELECT, INSERT, UPDATE, or DELETE, takes more than a few seconds to complete, blocking is likely. 
+
+Locks on SELECT statements are only held as long as it takes to read the data, not the entire length of the transaction. 
+Locks held by INSERT, UPDATE, and DELETE statements are held until the entire transaction is complete.  This is done in order to allow easy rollback of a transaction, if necessary
+
+What do to if blocking is taking a long time?
+•	Most blocking locks go away soon
+•	But if a blocking lock does not go away, and it is preventing one or more users from performing necessary tasks then find the culprit (SPID) and KILL the process
+•	Note: killing the blocking SPID will cause the current transaction to rollback and 
+•	Appropriate indexes have a great deal of control on blocking because the quicker that SQL Server can find the data it is looking for, the less time locks have to be in place
+Demo of Blocking and deadlock via SQL Server SSMS
+
+Script used to identify the blocking query
+SELECT
+db.name DBName,
+tl.request_session_id,
+wt.blocking_session_id,
+OBJECT_NAME(p.OBJECT_ID) BlockedObjectName,
+tl.resource_type,
+h1.TEXT AS RequestingText,
+h2.TEXT AS BlockingTest,
+tl.request_mode
+FROM sys.dm_tran_locks AS tl
+INNER JOIN sys.databases db ON db.database_id = tl.resource_database_id
+INNER JOIN sys.dm_os_waiting_tasks AS wt ON tl.lock_owner_address = wt.resource_address
+INNER JOIN sys.partitions AS p ON p.hobt_id = tl.resource_associated_entity_id
+INNER JOIN sys.dm_exec_connections ec1 ON ec1.session_id = tl.request_session_id
+INNER JOIN sys.dm_exec_connections ec2 ON ec2.session_id = wt.blocking_session_id
+CROSS APPLY sys.dm_exec_sql_text(ec1.most_recent_sql_handle) AS h1
+CROSS APPLY sys.dm_exec_sql_text(ec2.most_recent_sql_handle) AS h2
+GO
+
+
+Deadlock scripts:
+
+T1:
+Select * from TableOne
+Select * from TableTwo
+
+ --Session - Transaction #1
+ --As we execute the update, T1 has an exclusive lock (X) on TableOne
+
+BEGIN TRAN
+UPDATE TableOne 
+SET FNAME = 'MARY'
+WHERE ID = 	1
+
+--When executing this update, it is blocked cuz T2 has exclusive lock (X) on TableTwo 
+
+BEGIN TRAN
+UPDATE TableTwo 
+SET FNAME = 'SAM'
+WHERE ID = 	1
+
+COMMIT TRANSACTION
+
+
+
+
+T2:
+
+Select * from TableOne
+Select * from TableTwo
+
+ --Session2 - Transaction #2
+  --As we execute the update, T2 has an exclusive lock (X) on TableTwo
+
+
+BEGIN TRAN
+UPDATE TableTwo 
+SET FNAME = 'RANDOLPH'
+WHERE ID = 	1
+
+--When executing this update, it is blocked cuz T2 has exclusive lock (X) on TableOne
+
+BEGIN TRAN
+UPDATE TableOne 
+SET FNAME = 'BOB'
+WHERE ID = 	1
+
+COMMIT TRANSACTION
+
+
+
+
+
+********************************************
+
+SELECT
+db.name DBName,
+tl.request_session_id,
+wt.blocking_session_id,
+OBJECT_NAME(p.OBJECT_ID) BlockedObjectName,
+tl.resource_type,
+h1.TEXT AS RequestingText,
+h2.TEXT AS BlockingTest,
+tl.request_mode
+FROM sys.dm_tran_locks AS tl
+INNER JOIN sys.databases db ON db.database_id = tl.resource_database_id
+INNER JOIN sys.dm_os_waiting_tasks AS wt ON tl.lock_owner_address = wt.resource_address
+INNER JOIN sys.partitions AS p ON p.hobt_id = tl.resource_associated_entity_id
+INNER JOIN sys.dm_exec_connections ec1 ON ec1.session_id = tl.request_session_id
+INNER JOIN sys.dm_exec_connections ec2 ON ec2.session_id = wt.blocking_session_id
+CROSS APPLY sys.dm_exec_sql_text(ec1.most_recent_sql_handle) AS h1
+CROSS APPLY sys.dm_exec_sql_text(ec2.most_recent_sql_handle) AS h2
+GO
+
+*********************************
+
+update TableOne
+set fname = 'Tom'
+where id = 1
+
+
+Select * from TableOne
+
+--user1
+
+update TableOne
+set fname = 'Sam'
+where id = 1
+
+--user2
+
+update TableOne
+set fname = 'Matt'
+where id = 1
+
+
+--these updates are occuring because in the background, locks are being held and released at a very fast pace by each transaction!!!
+--if the locks were slow or and not releasing, then we will have perfomance issues.
+
+
+
+
+
+/*
+
+STEP TO FOLLOW: DEMONSTRATION OF A BLOCK
+
+1. TURN ON TRACE FOR SQL SERVER LOGS
+2. CREATE TWO TABLES IN SQL2 DB AND INSERT DATA
+3. CHECK STATUS OF BLOCKED LOCK VIA SP_WHO2
+4. RUN TRANSACTION 1 IN SESSION 1 WITHOUT COMMITING
+5. ON A SEPERATE SESSION (NEW QUERY) RUN TRANSACTION 2
+6. CHECK THE SP_WHO OR ACTIVE DIRECTORY FOR BLOCKING
+7. COMMITT THE TRANSACTION 1 AND SEE TRANSACTION 2 IS EXECUTED
+
+*/
+
+
+--FIND STATUS OF TRACE FOR SQL SERVER ERROR LOG RECORDS
+
+DBCC TRACESTATUS();
+GO
+
+--CHECK THE STATUS OF TRACE
+
+DBCC TRACESTATUS(1222);
+GO
+
+---TURN ON STATUS
+
+DBCC TRACEON (1222,-1);
+GO
+
+---TURN ON STATUS
+
+DBCC TRACEOFF (1222,-1);
+GO
+
+--use SQL2
+--Go
+
+--Drop table TableOne
+--Drop table TableTwo
+
+
+--RUN THIS SCRIPT TO CREATE A TABLE TableOne AND TableTwo AND INSERT DATA
+--THEN, EXECUTE STEP ONE.
+
+use sql2
+go
+
+create table TableOne
+(ID INT,
+Fname varchar (20))
+
+create table TableTwo
+(ID INT,
+Fname varchar (20))
+
+
+Insert into TableOne values (1,'Tom')
+
+Insert into TableTwo values (1,'Susan')
+
+Select * from TableOne
+
+
+
+--Check the status of lock with sp_who2 
+
+sp_who2
+
+--STEP 1
+/*
+SQL TRANSACTION 1 WILL UPDATE THE TableOne WITHOUT
+COMMITTING THE TRANSACTION, AS SUCH THE TRAN 1 IS STILL
+NOT COMMITTED.  THE LOCK IS STILL IN PLACE.
+*/
+
+Select * from TableOne
+
+
+BEGIN TRAN
+UPDATE TableOne 
+SET FNAME = 'MARY'
+WHERE ID = 	1
+
+--THIS SHOWS THAT THE UPDATE WAS SUCCESSFULL, BUT NOT COMMITTED
+
+--Select * from TableOne
+
+--SP_WHO2
+
+/*
+SINCE I HAVE NOT SET THE TRANSACTION TO COMMIT, IT IS STILL AN OPEN TRANSACTION
+AND ANY ATTEMP TO MODIFY TableOne WILL RESULT IN A BLOCK!!!
+*/
+-- ROLLBACK COMMAND UNDOS THE UPDATE OF TOM
+ROLLBACK
+
+COMMIT TRANSACTION
+
+--VIEW THE BLOCKED SPID VIA SPROC  (NO BLOCKING AS THE SECOND SESSION HAS NOT STARTED)
+
+SP_WHO2
+
+
+--STEP 3
+-- NOTICE THAT TRANSACTION 2 IS STULL RUNNING.
+-- AS SOON AS I COMMIT TRNASACTION 1, TRANSACTION 2 WILL COMMIT!!!
+
+Select * from TableOne  --(THIS SHOULD NOW BE UPDATED TO RANDOLPH)
+
+
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+----STEP 2  (CUT PASTE THE FOLLOWING BELOW TO ANOTHER SESSION)
+
+--/*
+
+--SQL TRANSACTION 2 WILL NOW TRY TO UPDATE THE SAME TABLE (TableOne)
+--WITH AND UPDATE, BUT OBSERVE IT WILL NOT BE ABLE TO UPDATE THE TABLE
+--AND AS SUCH WILL CONTINUE TO TRY TO EXECUTE THE TABLE.  THIS IS BECAUSE
+--TableOne HAS AN OPEN TRANSACTION TO THE TABLE FOR AN UPDATE THAT HAS NOT
+--BEEN COMMITTED!!!!
+--AS SOON AS THE COMMITTED TRANSACTION HAS BEEN APPLIED TO TRANSACTION 1
+--TRANSACTION 2 WILL UPDATE.
+
+
+--*/
+
+--BEGIN TRAN
+--UPDATE TableOne 
+--SET FNAME = 'randolph'
+--WHERE ID = 	1
+
+--COMMIT TRANSACTION
+
+
+
+
 
 
 ----------------------------------------------------------------------------
 
+What is an Extended Event?
+     An Extended Events is a SQL Server tool that allows the DBA to monitor what is going on in a SQL Server instance.  It monitors, very much like its predecessor, the SQL Profiler, a way to granularly capture events in the SQL environment.  But unlike SQL Server Profiler and SQL Trace it has several great benefits: it has little performance impact, the DBA does not need to write code to extract data and there is an easy front end graphical user interface.
+     Extended Events was introduced in SQL Server 2008, but with no GUI that interfaced with the events directly it made the task for the DBA to write complex code to gather data.  In version 2012 and beyond, the introduction of the GUI has made the life of a DBA a lot easier.
+Benefits of using the Extended Events:
+
+•	Extended Events built into SQL Server Management Studio
+•	Extended Events sessions can be created without any T-SQL commands or query XML data
+•	Hardly any overhead when using them on the SQL Server
+•	Less than 2% of the CPU’s resource 
+•	Replaces SQL Profiler and SQL Traces
+•	Easy to use and powerful (wizard driven)
+
+The reason to use Extended Events
+•	Finding long-running queries
+•	Tracking DDL operations
+•	Find missing statistics
+•	Resolving and finding blocking and deadlocking
+•	Queries that cause specific wait stats to occur
+•	Monitoring SQL Server memory stress
+Terminology:
+Package
+A package is a container which contains all the extended events objects; like Events, Actions, Targets, and Predicates
+
+Events
+SQL categories of event driven data for analysis
+Actions
+When an event is fired a response to that event is actions. 
+Targets
+The consumers of the events are called Targets.  For example, buffers to disk in the files and Ring Buffer which holds the event data in 
+Predicates
+Filter for events 
+Session
+A session is way of grouping events, their associated actions and predicates for filtering and different targets to process event firing. 
+
+Demo of Extended Event using the Wizard
+Find who, what, when altered the size of a database?
+
+
+
+
+
+
+
+**********************************************************
+
+
+--Create database 4MB in size
+
+CREATE DATABASE [SQLSize]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'SQLSize', 
+FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\SQLSize.mdf' , 
+SIZE = 4096KB ,        --<< original size 4MB
+FILEGROWTH = 1024KB )
+ LOG ON 
+( NAME = N'SQLSize_log', 
+FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\SQLSize_log.ldf' , 
+SIZE = 1024KB , 
+FILEGROWTH = 10%)
+GO
+
+
+--Alter the size of the database
+
+USE [master]
+GO
+
+ALTER DATABASE [SQLSize] 
+MODIFY FILE ( NAME = N'SQLSize', SIZE = 20480KB )
+GO
+
+ALTER DATABASE [SQLSize] 
+MODIFY FILE ( NAME = N'SQLSize_log', SIZE = 5120KB )
+GO
+
+--scripted out session
+
+CREATE EVENT SESSION [Altered Database Size] ON SERVER 
+ADD EVENT sqlserver.database_file_size_change(
+ACTION(sqlserver.database_id,sqlserver.database_name,sqlserver.nt_username,sqlserver.sql_text,sqlserver.username)
+WHERE ([sqlserver].[database_name]=N'SQLSize')) 
+ADD TARGET package0.event_file(SET filename=N'SQLSize')
+WITH (STARTUP_STATE=OFF)
+GO
+
+
+
+
+
+
+--Extended Event Packages
+
+SELECT pkg.name, pkg.description, mod.* 
+FROM sys.dm_os_loaded_modules mod 
+INNER JOIN sys.dm_xe_packages pkg 
+ON mod.base_address = pkg.module_address 
+
+
+--Package events
+
+select pkg.name as PackageName, obj.name as EventName 
+from sys.dm_xe_packages pkg 
+inner join sys.dm_xe_objects obj on pkg.guid = obj.package_guid 
+where obj.object_type = 'event' 
+order by 1, 2 
+
+
+--Package wise actions
+
+select pkg.name as PackageName, obj.name as ActionName 
+from sys.dm_xe_packages pkg 
+inner join sys.dm_xe_objects obj on pkg.guid = obj.package_guid 
+where obj.object_type = 'action' 
+order by 1, 2 
+
+--Package wise targets
+
+select pkg.name as PackageName, obj.name as TargetName 
+from sys.dm_xe_packages pkg 
+inner join sys.dm_xe_objects obj on pkg.guid = obj.package_guid 
+---where obj.object_type = 'target' 
+order by 1, 2 
+
+
+--Package wise predicates
+
+select pkg.name as PackageName, obj.name as PredicateName 
+from sys.dm_xe_packages pkg 
+inner join sys.dm_xe_objects obj on pkg.guid = obj.package_guid 
+where obj.object_type = 'pred_source' 
+order by 1, 2 
+
+
+--Event session with its events, actions and targets
+
+SELECT sessions.name AS SessionName, sevents.package as PackageName, 
+sevents.name AS EventName, 
+sevents.predicate, sactions.name AS ActionName, stargets.name AS TargetName 
+FROM sys.server_event_sessions sessions 
+INNER JOIN sys.server_event_session_events sevents 
+ON sessions.event_session_id = sevents.event_session_id 
+INNER JOIN sys.server_event_session_actions sactions 
+ON sessions.event_session_id = sactions.event_session_id 
+INNER JOIN sys.server_event_session_targets stargets 
+ON sessions.event_session_id = stargets.event_session_id 
+WHERE sessions.name = 'database size' 
+GO 
+
 
 ----------------------------------------------------------------------------
 
 
+ 
+IF EXISTS(SELECT * FROM sys.server_event_sessions WHERE name='LongRunningQuery')
+DROP EVENT SESSION LongRunningQuery ON SERVER
+GO
+
+-- Create Event
+CREATE EVENT SESSION LongRunningQuery
+ON SERVER
+
+-- Add event to capture event
+ADD EVENT sqlserver.rpc_completed
+(
+ACTION (sqlserver.sql_text, sqlserver.tsql_stack, sqlserver.client_app_name,
+sqlserver.username, sqlserver.client_hostname, sqlserver.session_nt_username)
+WHERE (
+duration > 1000 
+AND sqlserver.client_hostname <> 'A' 
+)
+),
+ADD EVENT sqlserver.sql_statement_completed
+(
+ACTION (sqlserver.sql_text, sqlserver.tsql_stack, sqlserver.client_app_name,
+sqlserver.username, sqlserver.client_hostname, sqlserver.session_nt_username)
+WHERE (
+duration > 1000
+AND sqlserver.client_hostname <> 'A'
+)
+),
+
+ADD EVENT sqlserver.module_end
+(
+ACTION (sqlserver.sql_text, sqlserver.tsql_stack, sqlserver.client_app_name,
+sqlserver.username, sqlserver.client_hostname, sqlserver.session_nt_username)
+WHERE (
+duration > 1000000
+AND sqlserver.client_hostname <> 'A'
+)
+)
+ADD TARGET package0.asynchronous_file_target(
+SET filename='C:\New folder\LongRunningQuery.xet', metadatafile='C:\New folder\LongRunningQuery.xem'),
+ADD TARGET package0.ring_buffer
+(SET max_memory = 4096)
+WITH (max_dispatch_latency = 1 SECONDS, TRACK_CAUSALITY = ON)
+GO
+ 
+ 
+ 
+-- Enable Event,
+ALTER EVENT SESSION LongRunningQuery ON SERVER
+STATE=START
+GO
+ 
+
+ 
+ 
+DECLARE	@XMLLongRunning XML
+SELECT	@XMLLongRunning = CAST(dt.target_data AS XML)
+FROM sys.dm_xe_session_targets dt
+JOIN	sys.dm_xe_sessions ds
+		ON ds.Address = dt.event_session_address
+JOIN	sys.server_event_sessions ss
+		ON ds.Name = ss.Name
+WHERE dt.target_name = 'ring_buffer'
+AND ds.Name = 'LongRunningQuery'
+ 
+select T.N.value('local-name(.)', 'varchar(max)') as Name,
+       T.N.value('.', 'varchar(max)') as Value
+from @XMLLongRunning.nodes('/*/@*') as T(N) 
+
+
+ 
+-- Stop the event
+ALTER EVENT SESSION LongRunningQuery ON SERVER
+STATE=STOP
+GO
+ 
+-- Clean up. Drop the event
+DROP EVENT SESSION LongRunningQuery
+ON SERVER
+GO
+ 
+ 
+ 
+ 
+------------------------------
+--Shred XML for easy reading--
+------------------------------
+ 
+--pull into temp table for speed and to make sure the ID works right
+if object_id('tempdb..#myxml') is not null
+DROP TABLE #myxml
+CREATE TABLE #myxml (id INT IDENTITY, actual_xml XML)
+INSERT INTO #myxml
+SELECT CAST(event_data AS XML)
+FROM sys.fn_xe_file_target_read_file
+('C:\New folder\LongRunningQuery*.xet',
+'C:\New folder\LongRunningQuery*.xem',
+NULL, NULL)
+ 
+ 
+--Now toss into temp table, generically shredded
+if object_id('tempdb..#ParsedData') is not null
+DROP TABLE #ParsedData
+CREATE TABLE #ParsedData (id INT, Actual_Time DATETIME, EventType sysname, ParsedName sysname, NodeValue VARCHAR(MAX))
+INSERT INTO #ParsedData 
+SELECT id,
+DATEADD(MINUTE, DATEPART(TZoffset, SYSDATETIMEOFFSET()), UTC_Time) AS Actual_Time,
+EventType,
+ParsedName,
+NodeValue
+FROM (
+SELECT id,
+A.B.value('@name[1]', 'varchar(128)') AS EventType,
+A.B.value('./@timestamp[1]', 'datetime') AS UTC_Time,
+X.N.value('local-name(.)', 'varchar(128)') AS NodeName,
+X.N.value('../@name[1]', 'varchar(128)') AS ParsedName,
+X.N.value('./text()[1]', 'varchar(max)') AS NodeValue
+FROM [#myxml]
+CROSS APPLY actual_xml.nodes('/*') AS A (B)
+CROSS APPLY actual_xml.nodes('//*') AS X (N)
+) T
+WHERE NodeName = 'value'
+DECLARE @SQL AS VARCHAR (MAX)
+DECLARE @Columns AS VARCHAR (MAX)
+SELECT @Columns=
+COALESCE(@Columns + ',','') + QUOTENAME(ParsedName)
+FROM
+(
+SELECT DISTINCT ParsedName
+FROM #ParsedData
+		
+WHERE ParsedName <> 'tsql_stack'
+) AS B
+SET @SQL='
+SELECT Actual_Time, EventType,' + @Columns + ' FROM
+(
+SELECT id, EventType, Actual_Time, ParsedName, NodeValue FROM
+#ParsedData ) AS source
+PIVOT
+(max(NodeValue) FOR source.ParsedName IN (' + @columns + ')
+)AS pvt order by actual_time, attach_activity_id'
+EXEC (@sql) 
+
+****************************************************************
+
+
+--all the events that are available
+
+SELECT p.name, c.event, k.keyword, c.channel, c.description FROM
+   (
+   SELECT event_package = o.package_guid, o.description, 
+   event=c.object_name, channel = v.map_value
+   FROM sys.dm_xe_objects o
+   LEFT JOIN sys.dm_xe_object_columns c ON o.name = c.object_name
+   INNER JOIN sys.dm_xe_map_values v ON c.type_name = v.name 
+   AND c.column_value = cast(v.map_key AS nvarchar)
+   WHERE object_type = 'event' AND (c.name = 'CHANNEL' or c.name IS NULL)
+   ) c LEFT JOIN 
+   (
+   SELECT event_package = c.object_package_guid, event = c.object_name, 
+   keyword = v.map_value
+   FROM sys.dm_xe_object_columns c INNER JOIN sys.dm_xe_map_values v 
+   ON c.type_name = v.name AND c.column_value = v.map_key 
+   AND c.type_package_guid = v.object_package_guid
+   INNER JOIN sys.dm_xe_objects o ON o.name = c.object_name 
+   AND o.package_guid = c.object_package_guid
+   WHERE object_type = 'event' AND c.name = 'KEYWORD' 
+   ) k
+   ON
+   k.event_package = c.event_package AND (k.event=c.event or k.event IS NULL)
+   INNER JOIN sys.dm_xe_packages p ON p.guid = c.event_package
+ORDER BY 
+--keyword , channel, event,
+c.description
+
+--To view which actions are available, use the following query:
+
+SELECT p.name AS 'package_name', xo.name AS 'action_name', xo.description, xo.object_type
+FROM sys.dm_xe_objects AS xo
+JOIN sys.dm_xe_packages AS p
+   ON xo.package_guid = p.guid
+WHERE 
+--xo.object_type = 'action'
+--AND 
+(xo.capabilities & 1 = 0 
+OR xo.capabilities IS NULL)
+ORDER BY p.name, xo.name
+
+
+
+--To view which predicates are available for an event, use the following query, 
+--replacing event_name with the name of the event for which you want to add a predicate:
+
+SELECT *
+FROM sys.dm_xe_object_columns
+--WHERE object_name = 'event_name'
+--AND column_type = 'data'
+
+--view which global predicate sources are available, use the following query:
+
+SELECT p.name AS package_name, xo.name AS predicate_name
+   , xo.description, xo.object_type
+FROM sys.dm_xe_objects AS xo
+JOIN sys.dm_xe_packages AS p
+   ON xo.package_guid = p.guid
+--WHERE xo.object_type = 'pred_source'
+--ORDER BY p.name, xo.name
+
+
+--To view the list of available targets, use the following query:
+
+SELECT p.name AS 'package_name', xo.name AS 'target_name'
+   , xo.description, xo.object_type 
+FROM sys.dm_xe_objects AS xo
+JOIN sys.dm_xe_packages AS p
+   ON xo.package_guid = p.guid
+--WHERE xo.object_type = 'target'
+--AND (xo.capabilities & 1 = 0
+--OR xo.capabilities IS NULL)
+--ORDER BY p.name, xo.name
+
+
+--The following example creates an Extended Events session named IOActivity that captures the following information:
+
+--Event data for completed file reads, including the associated Transact-SQL text for file reads where the file ID is equal to 1.
+
+--Event data for completed file writes.
+
+--Event data for when data is written from the log cache to the physical log file.
+
+--The session sends the output to a file target.
+
+CREATE EVENT SESSION IOActivity
+ON SERVER
+
+ADD EVENT sqlserver.file_read_completed
+   (
+   ACTION (sqlserver.sql_text)
+   WHERE file_id = 1),
+ADD EVENT sqlserver.file_write_completed,
+ADD EVENT sqlserver.databases_log_flush
+
+ADD TARGET package0.asynchronous_file_target 
+   (SET filename = 'c:\temp\xelog.xel', metadatafile = 'c:\temp\xelog.xem')
+
+
+   
+**********************************************************
+
+-- Create the Event Session --
+------------------------------
+ 
+IF EXISTS(SELECT * FROM sys.server_event_sessions WHERE name='LongRunningQuery')
+DROP EVENT SESSION LongRunningQuery ON SERVER
+GO
+-- Create Event
+CREATE EVENT SESSION LongRunningQuery
+ON SERVER
+-- Add event to capture event
+ADD EVENT sqlserver.rpc_completed
+(
+-- Add action - event property ; can't add query_hash in R2
+ACTION (sqlserver.sql_text, sqlserver.tsql_stack, sqlserver.client_app_name,
+sqlserver.username, sqlserver.client_hostname, sqlserver.session_nt_username)
+-- Predicate - time 1000 milisecond
+WHERE (
+duration > 1000 --by leaving off the event name, you can easily change to capture diff events
+AND sqlserver.client_hostname <> 'A' --cant use NOT LIKE prior to 2012
+)
+--by leaving off the event name, you can easily change to capture diff events
+),
+ADD EVENT sqlserver.sql_statement_completed
+-- or do sqlserver.rpc_completed, though getting the actual SP name seems overly difficult
+(
+-- Add action - event property ; can't add query_hash in R2
+ACTION (sqlserver.sql_text, sqlserver.tsql_stack, sqlserver.client_app_name,
+sqlserver.username, sqlserver.client_hostname, sqlserver.session_nt_username)
+-- Predicate - time 1000 milisecond
+WHERE (
+duration > 1000
+AND sqlserver.client_hostname <> 'A'
+)
+),
+--adding Module_End. Gives us the various SPs called.
+ADD EVENT sqlserver.module_end
+(
+ACTION (sqlserver.sql_text, sqlserver.tsql_stack, sqlserver.client_app_name,
+sqlserver.username, sqlserver.client_hostname, sqlserver.session_nt_username)
+WHERE (
+duration > 1000000
+--note that 1 second duration is 1million, and we still need to match it up via the causality
+AND sqlserver.client_hostname <> 'A'
+)
+)
+-- Add target for capturing the data - XML File
+-- You don't need this (pull the ring buffer into temp table),
+-- but allows us to capture more events (without allocating more memory to the buffer)
+--!!! Remember the files will be left there when done!!!
+ADD TARGET package0.asynchronous_file_target(
+SET filename='C:\New folder\LongRunningQuery.xet', metadatafile='C:\New folder\LongRunningQuery.xem'),
+-- Add target for capturing the data - Ring Buffer. Can query while live, or just see how chatty it is
+ADD TARGET package0.ring_buffer
+(SET max_memory = 4096)
+WITH (max_dispatch_latency = 1 SECONDS, TRACK_CAUSALITY = ON)
+GO
+ 
+ 
+ 
+-- Enable Event, aka Turn It On
+ALTER EVENT SESSION LongRunningQuery ON SERVER
+STATE=START
+GO
+    
+	
+*******************************************************************
+
+
+
+--The following example shows how to drop an event session.
+
+DROP EVENT SESSION evt_spin_lock_diagnosis
+ON SERVER
+
+--Lists all the event session definitions that exist in SQL Server.
+
+SELECT  * FROM sys.server_event_sessions 
+
+--Returns a row for each action on each event of an event session.
+
+SELECT  * FROM sys.server_event_session_actions 
+
+--Returns a row for each event in an event session
+
+SELECT  * FROM sys.server_event_session_events 
+
+--Returns a row for each customizable column that was explicitly set on events and targets
+
+SELECT  * FROM sys.server_event_session_fields 
+
+--Returns a row for each event target for an event session.
+
+SELECT  * FROM sys.server_event_session_targets 
+
+
+
+--view the Extended Events equivalents to SQL Trace events using Query Editor
+
+USE MASTER;
+GO
+
+SELECT DISTINCT
+tb.trace_event_id,
+te.name AS 'Event Class',
+em.package_name AS 'Package',
+em.xe_event_name AS 'XEvent Name',
+tb.trace_column_id,
+tc.name AS 'SQL Trace Column',
+am.xe_action_name as 'Extended Events action'
+FROM (sys.trace_events te LEFT OUTER JOIN sys.trace_xe_event_map em
+ON te.trace_event_id = em.trace_event_id) LEFT OUTER JOIN sys.trace_event_bindings tb
+ON em.trace_event_id = tb.trace_event_id LEFT OUTER JOIN sys.trace_columns tc
+ON tb.trace_column_id = tc.trace_column_id LEFT OUTER JOIN sys.trace_xe_action_map am
+ON tc.trace_column_id = am.trace_column_id
+where tc.name like '%completed%'
+ORDER BY te.name, tc.name
+
+select * from sys.trace_Events
+
+
+--To get the fields for all events 
+
+select p.name package_name, o.name event_name, c.name event_field, c.type_name field_type, c.column_type column_type
+from sys.dm_xe_objects o
+join sys.dm_xe_packages p
+on o.package_guid = p.guid
+join sys.dm_xe_object_columns c
+on o.name = c.object_name
+where o.object_type = 'event'
+order by package_name, event_name
+
+
+
+******************************************************************
+
+
+
+ --WHEN USING TSQL TO CREATE AN EXTENDED EVENT, THESE ARE THE 'STEPS' TO FOLLOW:
+
+ --1:  EXECUTE THE SCRIPT TO DROP ANY EXISTING SESSIONS
+
+IF EXISTS(SELECT * FROM sys.server_event_sessions 
+WHERE name='FindProblemQueries')
+DROP EVENT SESSION FindProblemQueries ON SERVER
+GO
+
+--2: CREATE AN EVENT SESSION
+
+CREATE EVENT SESSION FindProblemQueries
+ON SERVER
+
+--3: SELECT THE EVENTS YOU WANT TO CAPUTRE WITH THE ACTIONS (GLOBAL FIELDS) AND PREDICATES (FILTERS)
+
+ADD EVENT sqlserver.sql_statement_completed
+(ACTION (sqlserver.sql_text, sqlserver.tsql_stack, sqlserver.client_app_name,
+sqlserver.username, sqlserver.client_hostname, sqlserver.session_nt_username)
+WHERE (duration > 1000
+AND sqlserver.client_hostname = 'DESKTOP-QMOOH4U'))
+
+--4 ADD THE TARGET (WHERE YOU WANT TO SAVE THE FILES)
+
+ADD TARGET package0.asynchronous_file_target(
+SET filename='C:\New folder\FindProblemQueries.xet', metadatafile='C:\New folder\FindProblemQueries.xem'),
+
+--SAVE IN MEMORY
+
+ADD TARGET package0.ring_buffer
+(SET max_memory = 4096)
+WITH (max_dispatch_latency = 1 SECONDS, TRACK_CAUSALITY = ON)
+GO
+ 
+ --STEPS 1 THROUGH 4 SHOULD BE EXECUTED AT ONCE
+ 
+--5: START THE SESSION
+
+ALTER EVENT SESSION FindProblemQueries ON SERVER
+STATE=START
+GO
+ 
+ --INSERT DATA
+
+ SELECT TOP 1000 [Fname]
+      ,[Lname]
+      ,[Phone]
+  FROM [SQL2].[dbo].[People2]
+ 
+--7: START THE SESSION
+
+ALTER EVENT SESSION FindProblemQueries ON SERVER
+STATE=STOP
+GO
+ 
+--8: DROP THE SESSION (DROPPING THE SESSION DOES NOT DELETE THE FILES!!!)
+
+DROP EVENT SESSION FindProblemQueries
+ON SERVER
+GO
+
+ 
+--9: CREATE A TEMP TABLE FOR ANALYSIS
+
+if object_id('tempdb..#myxml') is not null
+DROP TABLE #myxml
+CREATE TABLE #myxml (id INT IDENTITY, actual_xml XML)
+INSERT INTO #myxml
+SELECT CAST(event_data AS XML)
+FROM sys.fn_xe_file_target_read_file
+('C:\New folder\FindProblemQueries*.xet',
+'C:\New folder\FindProblemQueries*.xem',
+NULL, NULL)
+ 
+ 
+--10: INSERT INTO TEMP TABLE TO VIEW DATA COLLECTED
+
+if object_id('tempdb..#ParsedData') is not null
+DROP TABLE #ParsedData
+CREATE TABLE #ParsedData (id INT, Actual_Time DATETIME, EventType sysname, ParsedName sysname, NodeValue VARCHAR(MAX))
+INSERT INTO #ParsedData 
+SELECT id,
+DATEADD(MINUTE, DATEPART(TZoffset, SYSDATETIMEOFFSET()), UTC_Time) AS Actual_Time,
+EventType,
+ParsedName,
+NodeValue
+FROM (
+SELECT id,
+A.B.value('@name[1]', 'varchar(128)') AS EventType,
+A.B.value('./@timestamp[1]', 'datetime') AS UTC_Time,
+X.N.value('local-name(.)', 'varchar(128)') AS NodeName,
+X.N.value('../@name[1]', 'varchar(128)') AS ParsedName,
+X.N.value('./text()[1]', 'varchar(max)') AS NodeValue
+FROM [#myxml]
+CROSS APPLY actual_xml.nodes('/*') AS A (B)
+CROSS APPLY actual_xml.nodes('//*') AS X (N)
+) T
+WHERE NodeName = 'value'
+DECLARE @SQL AS VARCHAR (MAX)
+DECLARE @Columns AS VARCHAR (MAX)
+SELECT @Columns=
+COALESCE(@Columns + ',','') + QUOTENAME(ParsedName)
+FROM
+(
+SELECT DISTINCT ParsedName
+FROM #ParsedData
+		
+WHERE ParsedName <> 'tsql_stack'
+) AS B
+SET @SQL='
+SELECT Actual_Time, EventType,' + @Columns + ' FROM
+(
+SELECT id, EventType, Actual_Time, ParsedName, NodeValue FROM
+#ParsedData ) AS source
+PIVOT
+(max(NodeValue) FOR source.ParsedName IN (' + @columns + ')
+)AS pvt order by actual_time, attach_activity_id'
+EXEC (@sql) 
+
+
+
+
+--Lists all the event session definitions that exist in SQL Server.
+
+SELECT  * FROM sys.server_event_sessions 
+
+--Returns a row for each action on each event of an event session.
+
+SELECT  * FROM sys.server_event_session_actions 
+
+--Returns a row for each event in an event session
+
+SELECT  * FROM sys.server_event_session_events 
+
+--Returns a row for each customizable column that was explicitly set on events and targets
+
+SELECT  * FROM sys.server_event_session_fields 
+
+--Returns a row for each event target for an event session.
+
+SELECT  * FROM sys.server_event_session_targets 
+
+
+
+--view the Extended Events equivalents to SQL Trace events using Query Editor
+
+USE MASTER;
+GO
+
+SELECT DISTINCT
+tb.trace_event_id,
+te.name AS 'Event Class',
+em.package_name AS 'Package',
+em.xe_event_name AS 'XEvent Name',
+tb.trace_column_id,
+tc.name AS 'SQL Trace Column',
+am.xe_action_name as 'Extended Events action'
+FROM (sys.trace_events te LEFT OUTER JOIN sys.trace_xe_event_map em
+ON te.trace_event_id = em.trace_event_id) LEFT OUTER JOIN sys.trace_event_bindings tb
+ON em.trace_event_id = tb.trace_event_id LEFT OUTER JOIN sys.trace_columns tc
+ON tb.trace_column_id = tc.trace_column_id LEFT OUTER JOIN sys.trace_xe_action_map am
+ON tc.trace_column_id = am.trace_column_id
+where tc.name like '%completed%'
+ORDER BY te.name, tc.name
+
+select * from sys.trace_Events
+
+
+--To get the fields for all events 
+
+select p.name package_name, o.name event_name, c.name event_field, 
+c.type_name field_type, c.column_type column_type
+from sys.dm_xe_objects o
+join sys.dm_xe_packages p
+on o.package_guid = p.guid
+join sys.dm_xe_object_columns c
+on o.name = c.object_name
+where o.object_type = 'event'
+order by package_name, event_name
+
+	
+
 ----------------------------------------------------------------------------
 
+SQL Database Snapshots
+
+What is a database snapshot?
+
+A database snapshot provides a read-only, static view of a source database as it existed at snapshot creation
+•	Snapshots are dependent on the source database 
+•	Snapshots must be on the same server instance as the database
+•	If the source database becomes corrupt or unavailable for any reason, all snapshots also become unavailable
+•	Database snapshots operate at the data-page level, which means that as each page of data is updated in the source database, it copies the original page from the source database to the snapshot
+•	This process is called a copy-on-write operation
+•	The snapshot stores the original page, preserving the data records as they existed when the snapshot was created
+•	Subsequent updates to records in a modified page do not affect the contents of the snapshot
+•	The copied original pages are stored in a sparse file
+•	Initially, a sparse file has not yet been allocated disk space for user data
+•	As more and more pages are updated in the source database, the size of the file grows
+
+
+
+
+
+What is the purpose of the Database Snapshot?
+•	Snapshots can be used for reporting purposes – read-only db
+•	In the event of a user error on a source database (delete table), you can revert the source database to the state it was in when the snapshot was created
+•	If a deletion of a table occurs, then you can restore that point in time of data from the snapshot, rather than doing a full database backup followed by all transactional backups
+
+
+
+ 	Important 	
+Because database snapshots are not redundant storage, they do not protect against disk errors or other types of corruption. Taking regular backups and testing your restore plan are essential to protect a database. Snapshots are not a substitute for a backup!!!!
+
+
+
+******************************************************************
+
+
+--CREATE A NEW DATABASE
+
+CREATE DATABASE DBS   --<<  PRIMARY SOURCE PRODUCTION DATABASE
+GO
+
+--CREATE TABLE NAMES
+
+USE DBS
+GO
+
+CREATE TABLE NAMES (id INT, FNAME VARCHAR (20))
+
+--INSERT DATA INTO TABLE
+
+INSERT INTO NAMES VALUES (1,'ALBERT'),(2,'BOB'),(3,'CHARLES')
+
+--VIEW DATA
+
+SELECT * FROM NAMES
+
+--VEIW ALL DATABASES, INCLUDING THE DBS
+
+Select * from sys.databases
+
+--VIEW THE LOGICAL NAME OF THE DATA FILE OF PRODUCTION DBS
+
+Sp_helpdb 'DBS'
+
+
+--CREATE A DATABASE SNAPSHOT OF DBS
+
+CREATE DATABASE Snapshot_DBS ON          --<< NAME OF THE SNAPSHOT DB
+(Name ='DBS',                            --<< NAME OF THE LOGICAL DATA FILE
+FileName='C:\Snapshots\Snapshot_DBS.ss') --<< FILE LOCATION OF THE SNAPSHOT WITH SS EXTENTION
+AS SNAPSHOT OF DBS;
+GO
+
+--REVIEW THE SIZE OF DATABASE VIA GUI
+
+--DROP TABLE ON PRIMARY PRODUCTION DATABASE DBS
+
+USE DBS
+GO
+
+DROP TABLE NAMES
+
+--RESTORE THE TABLE FROM THE SNAPSHOT
+
+USE MASTER
+GO
+
+RESTORE DATABASE DBS
+FROM DATABASE_SNAPSHOT = 'Snapshot_DBS'
+
+--VERIFY RECOVERY OF TABLE
+
+USE DBS
+GO
+
+SELECT * FROM NAMES
+
+--INSERT NEW DATA INTO PRODUCTION DATABASE AND TABLE
+
+USE DBS
+GO
+
+INSERT INTO NAMES VALUES (4,'EUGENE')
+
+USE DBS
+GO
+
+SELECT * FROM NAMES
+
+--DID IT UPDATE THE SNAPSHOT DATABASE AND TABLE??
+
+USE Snapshot_DBS
+GO
+
+SELECT * FROM NAMES
+
+--NO!!! AS THE SNAPSHOT IS ONLY CONTAINS A THE 'COPY' AT THE TIME OF THE SNAPSHOT CREATION
+
+--CAN YOU EXECUTE UPDATE OR INSERT THE SNAPSHOT TABLE(S)?
+
+USE Snapshot_DBS
+GO
+
+UPDATE NAMES
+SET FNAME = 'It Dept'
+
+--CANOT UPDATE OR INSERT OR DELETE AS IT'S READ-ONLY
+
+
+DROP DATABASE Snapshot_DBS
+GO
+
+
+
+----------------------------------------------------------------------------
+
+
+--Count how many rows i have
+--Move date from source to destination via wizard and script
+
+select count (*) from people
+--3:30 mins
+
+--import the following from source to destination database
+
+select  top 500000 * from people
+--6 secs
 
 ----------------------------------------------------------------------------
 
