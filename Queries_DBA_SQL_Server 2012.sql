@@ -6085,10 +6085,1787 @@ select  top 500000 * from people
 ----------------------------------------------------------------------------
 
 
-----------------------------------------------------------------------------
+What is Bulk Copy Program (BCP)
+
+The bcp utility (Bcp.exe) is a command-line tool that uses the Bulk Copy Program (BCP) to perform the following tasks:
+•	The bcp utility can export data from a SQL Server table to a data file 
+•	The bcp utility can import data from a data file to a SQL Server table 
+•	Generates format files
+The bcp utility is accessed by the bcp command or by using a batch file
+You can use a batch file to set up a schedule using BCP
+BCP is case sensitive
+User must be aware of the data types and lengths of the table columns
+The bcp command provides switches that you use to specify the data type of the data file and other information
+
+Syntax and switches
+
+bcp [database_name.] schema.{table_name | view_name | "query" {in data_file | out data_file | queryout data_file | format nul}
+
+   [-a packet_size]
+   [-b batch_size]
+   [-c]
+   [-C { ACP | OEM | RAW | code_page } ]
+   [-d database_name]
+   [-e err_file]
+   [-E]
+   [-f format_file]
+   [-F first_row]
+   [-h"hint [,...n]"] 
+   [-i input_file]
+   [-k]
+   [-K application_intent]
+   [-L last_row]
+   [-m max_errors]
+   [-n]
+   [-N]
+   [-o output_file]
+   [-P password]
+   [-q]
+   [-r row_term]
+   [-R]
+   [-S [server_name[\instance_name]]
+   [-t field_term]
+   [-T]
+   [-U login_id]
+   [-v]
+   [-V (80 | 90 | 100 | 110)]
+   [-w]
+   [-x]
+   /?
+
+
+
+Examples
+
+1. Using bcp to EXPORT data from SQL table to flat file using OUT
+
+--Syntax: 
+
+bcp databasename.schema.tablename out "to the path" -T (trusted credentials) -c (char datatype)
+
+--the following command will export data FROM sql to flat file
+bcp sql2.dbo.people3 out "c:\bcps\people3.txt" -T -c
+
+bcp sql2.dbo.people3 out "E:\CursoSQLServer2012\SQL2\people3.txt" -T -c
+
+--the following command will import data FROM flat file sql to
+bcp sql2.dbo.people4 in "c:\bcps\people3.txt" -T -c
+
+bcp sql2.dbo.people4 in "E:\CursoSQLServer2012\SQL2\people3.txt" -T -c
+
+--create table peopel4 in SQL2 database to receive data from file
+
+USE [SQL2]
+GO
+
+CREATE TABLE [dbo].[PEOPLE4](
+	[PeopleID] [int] NOT NULL,
+	[Fname] [varchar](20) NULL,
+	[Lname] [varchar](20) NULL,
+	[Address1] [varchar](100) NULL,
+	[City] [varchar](50) NULL,
+	[State] [varchar](50) NULL,
+	[Zip] [varchar](10) NULL,
+	[Country] [varchar](50) NULL,
+	[Phone] [varchar](20) NULL
+) ON [PRIMARY]
+
+GO
+
+
+--2. Send data from sql to file using a query
+
+bcp "select top 100 * from sql2.dbo.people3" queryout "c:\bcps\query.txt" -T -c
+
+
+
+
+**************************************************************************
+
+--CREATE TABLE FIRST TO RECIVE BCP DATA
+USE [SQL2]
+GO
+
+CREATE TABLE [dbo].[PEOPLE4](
+	[PeopleID] [int] NOT NULL,
+	[Fname] [varchar](20) NULL,
+	[Lname] [varchar](20) NULL,
+	[Address1] [varchar](100) NULL,
+	[City] [varchar](50) NULL,
+	[State] [varchar](50) NULL,
+	[Zip] [varchar](10) NULL,
+	[Country] [varchar](50) NULL,
+	[Phone] [varchar](20) NULL
+) ON [PRIMARY]
+
+GO
+
+
+--TRUNCATE TABLE PEOPLE4
+
+--USE [SQL2]
+--GO
+
+--SELECT [PeopleID]
+--      ,[Fname]
+--      ,[Lname]
+--      ,[Address1]
+--      ,[City]
+--      ,[State]
+--      ,[Zip]
+--      ,[Country]
+--      ,[Phone]
+--  FROM [dbo].[PEOPLE4]
+--GO
+
+
 
 
 ----------------------------------------------------------------------------
+
+Summary of step so far
+
+•	Created 4 virtual machine on free VMware software
+•	One Domain Controller (DC)
+•	Three virtual Servers (Server1, Server2, Server3)
+•	Configured the virtual servers (changed sever name, IE off, disable firewall, IP address, etc.)
+•	Joined SQL domain
+•	Installed SQL Servers 2016 on each virtual server – except the DC
+•	Updated the free VMware workstation to 30 day trial version to manage easier with tabs
+•	Uploaded the four VMs from the path of VMs
+
+What is High Availability (HA?)
+
+      The principal goal of a high availability solution is to minimize the impact of downtime and provide redundancy for databases throughout the enterprise
+
+What is SQL Server log shipping?
+SQL Server log shipping is one of the high availability solutions which involves two or more SQL Server instances; the source server is called the Primary Server and the destination is called Secondary server(s).  Log shipping involves the transferring of the transaction log file from the primary server to the secondary server.  Log Shipping is a basic level SQL Server high-availability technology that is part of SQL Server.  This is automated by three SQL jobs
+
+Advantages are:
+•	SQL Server log shipping is primarily used as a disaster recovery solution
+•	It’s reliable and tested in details
+•	It’s easy to set up and maintain
+•	Log shipping can be combined with other disaster recovery options such as Always On Availability Groups, database mirroring, and database replication
+•	Low cost in human and server resources
+Disadvantages are:
+•	Need to manage all the databases separately
+•	There isn’t possibility for an automatic failover; must be manual
+•	And secondary database isn’t fully readable while the restore process is running
+Terms and Definitions
+Primary server
+Source SQL Server production server
+Secondary server
+Destination SQL Server where you want to keep a warm standby copy of your primary database
+Monitor server (Optional)
+An SQL Server that tracks all of the details of log shipping such as:
+•	Transaction log last backed up
+•	Copied and restored the backup files on secondary server
+•	Information about backup failure alerts
+
+Prerequisite: the Primary Server should be in Full Recovery Mode
+--FIND THE RECOVERY MODE
+
+SELECT name AS [Database Name],
+recovery_model_desc AS [Recovery Model] FROM sys.databases
+GO
+
+--CHANGE THE RECOVERY MODE IF NECESSARY
+
+USE [master]
+GO
+
+ALTER DATABASE LOGSHIP 
+SET RECOVERY FULL 
+WITH NO_WAIT
+GO
+
+Operating modes:
+There are two available modes and they are related to the state in which the secondary log shipped SQL Server database will be:
+•	Standby mode – the database is available for querying and users can access it, but in read-only mode
+•	Restore mode – the database is not accessible
+
+STEP BY STEPS:
+•	CREATE A DOMAIN USER ACCOUNT FOR LOG SHIPPING
+•	CREATE A SQL LOGIN FOR LOG SHIPPING WITH SYSADMIN PERMISSION
+•	CREATE A DOMAIN SERVICE ACCOUNT FOR SQL SERVER AND SQL AGENT
+•	CREATE A NETWORK SHARE FOLDER FOR THE BACKUPS ON PRIMARY WITH PERMISSION TO SQL AGENT (READ)
+•	CREATE A NETWORK SHARE FOLDER FOR THE COPY/RESTORE ON SECONDARY WITH PERMISSION TO SQL AGENT (READ AND WRITE)
+•	FIND RECOVERY MODE OF LOG SHIPPING DATABASE
+•	TAKE FULL BACK UP OF THE PRIMARY DATABASE TO NETWORK SHARE
+•	RESTORE FULL AND LOG BACKUP ON SECONDARY SERVER WITH NO RECOVERY OPTION (RESTORING STATE)
+•	SET UP LOG SHIPPING VIA GUI ON PRIMARY DATABASE
+•	COPY LOG SHIPPING VIA GUI IN SECONDARY SERVER
+•	RESTORE LOG SHIPPING VIA GUI IN SECONDARY SERVER
+•	CHECK THE LOG SHIPPING PROCESS WITH DATA
+
+Permissions
+Must have sysadmin rights on the server
+
+Next video: What happens when the primary server goes down?
+
+
+
+
+----------------------------------------------------------------------------
+
+Log shipping Manual Failover
+
+The primary reason(s) you will want to failover the primary database to the secondary database is when you need to:
+•	Apply to the primary database with service packs 
+•	Correct a corrupt database
+•	Replace hardware failure (disk is damaged)
+•	
+Steps:
+Find the last back up, copy and restore files
+On primary:
+Run the following script to find last backup made:
+
+On secondary:
+Run the following script to find last copy and restore made:
+Use msdb
+Go
+
+Select secondary_server, secondary_database, last_copied_file, last_restored_date ,last_restored_file,*
+From log_shipping_monitor_secondary
+
+1.	run the last tail tlog backup of primary
+2.	run the copy and restore jobs on secondary
+3.	disable all three jobs
+4.	run tlog back up on primary with no recovery
+5.	
+•	BACKUP LOG [Test_LS] 
+•	TO  DISK = N'C:\Source_LS\Tail.trn' 
+•	WITH 
+•	NORECOVERY 
+•	GO
+
+
+6.	copy paste the tail tlog backup from primary to secondary folder
+7.	restore secondary database with the tail backup with recovery mode
+8.	
+9.	RESTORE LOG [Test_LS] 
+10.	FROM  DISK = N'C:\Dest_LS\Tail.trn' 
+•	WITH  NORECOVERY 
+11.	GO
+
+
+12.	on secondary database, start the log shipping process, using the secondary share folder
+13.	set up initial primary as secondary using the primary share folder
+14.	notice no need to take a full back up as the initial primary has been initialized
+15.	notice that we have 3 new jobs recreated for the reverse log shipping process
+16.	delete the old jobs to avoid confusion
+17.	validate that the new failed over database is accessible
+
+
+--ON PRIMARY SERVER
+
+Use msdb
+Go
+
+Select primary_server, primary_database, last_backup_date, last_backup_file ,*
+from log_shipping_monitor_primary 
+
+--1. take a final tail log backup for any transactions not backed up if the transaction log numbers dont match
+
+--2 diable all three jobs
+
+--3. run the following tail log backup with no recovery on primary server
+
+BACKUP LOG [Test_LS] 
+TO  DISK = N'C:\Source_LS\Tail.trn' 
+WITH 
+NORECOVERY --<< the norecovery mode will make the database in a restoring state
+GO
+
+--4. copy paste this last tail log from primary to secondary.  
+
+--go to secondary server and exectue step 5
+
+RESTORE LOG [Test_LS] 
+FROM  DISK = N'C:\Dest_LS\Tail.trn' 
+WITH  RECOVERY
+
+-- ON SERVER SECONDARY
+
+Use msdb
+Go
+
+Select secondary_server, secondary_database, last_copied_file, last_restored_date ,last_restored_file,*
+From log_shipping_monitor_secondary
+
+--5.
+
+RESTORE LOG [Test_LS] 
+FROM  DISK = N'C:\Dest_LS\Tail.trn' 
+WITH  RECOVERY
+
+
+--6 start the log shipping process from start making this the primary, and the original primary the secondary
+
+
+
+*********************************
+
+
+ 
+Solving problems of orphaned users when moving a database from source to destination (log shipping, mirroring, attach)
+
+
+--drop database orphans
+
+--STEP 1. CREATE A DATABASE AND TABLE, POPULATE TABLE
+
+--Create a database 
+
+Use master
+go
+
+
+CREATE DATABASE [Orphans]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'Orphans', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\Orphans.mdf', 
+SIZE = 8192KB , 
+FILEGROWTH = 65536KB )
+
+ LOG ON 
+( NAME = N'Orphans_log', 
+FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\Orphans_log.ldf', 
+SIZE = 8192KB , 
+FILEGROWTH = 65536KB )
+GO
+
+--create table cars
+
+USE [Orphans]
+GO
+
+CREATE TABLE [dbo].[Cars](
+[cars] [varchar](50) NULL
+) ON [PRIMARY]
+GO
+
+
+--Insert data into table cars
+
+USE [Orphans]
+GO
+
+insert into Cars values('Rolls Royce'),('Benz'),('Bently'),('Porche'),('Jag')
+
+select * from Cars
+
+--STEP 2.CREATE A SQL LOGIN SANDY
+
+USE [master]
+GO
+
+CREATE LOGIN [SANDY] 
+WITH PASSWORD=N'password123', 
+DEFAULT_DATABASE=[master], 
+CHECK_EXPIRATION=OFF, 
+CHECK_POLICY=OFF
+GO
+
+--STEP 4. FIND ALL THE USERS AND LOGINS IN DATABASE (RUN ON SERVER1 THEN ON SERVER 2)
+
+use Orphans
+go
+
+Select LOGINNAME, SID--<< FIND ALL LOGINS  (TOM AND SANDY)
+from sys.syslogins 
+ORDER BY 1 DESC
+
+Select NAME,sid --<< FIND ALL USERS
+from sys.sysusers 
+ORDER BY 1 DESC
+
+
+--5. CREATE AND MAP SANDY SQL LOGIN TO DATABASE ORPHAN
+
+USE [Orphans]
+GO
+CREATE USER [SANDY] FOR LOGIN [SANDY]
+GO
+
+--FIND SPECIFICALLY SANDY'S SID
+
+Select LOGINNAME, SID--<< FIND LOGINS SID FOR (SANDY)
+from sys.syslogins WHERE loginname = 'SANDY'
+ORDER BY 1 DESC
+
+Select NAME,sid --<< FIND SID FOR SANDY
+from sys.sysusers WHERE NAME = 'SANDY'
+ORDER BY 1 DESC
+
+--NOTICE BOTH THE SIDS ARE THE SAME
+
+--STEP 6. MOVE DATABASE ORPHANS FROM SERVER1 TO SERVER2 USING BACKUP AND RESTORE
+
+BACKUP DATABASE [Orphans] 
+TO  DISK = N'C:\s\ORPHANS.BAK' 
+WITH NOFORMAT, 
+NOINIT,  
+NAME = N'Orphans-Full Database Backup', 
+SKIP, 
+NOREWIND, 
+NOUNLOAD,  
+STATS = 10
+GO
+
+
+--STEP 6. COPY PASTE THE BACKUP AND RESTORE ON SERVER2 AND NOTICE WHICH SQL LOGINS AND USERS MOVED WITH THE DATABASE 
+
+--STEP 7.
+--(RUN RESTORE ON SERVER2)
+--(RUN RESTORE ON SERVER2)
+
+USE [master]
+RESTORE DATABASE [Orphans] 
+FROM  DISK = N'\\SERVER2\D\ORPHANS.BAK' WITH  FILE = 1,  
+MOVE N'Orphans' 
+TO N'C:\Program Files\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Orphans.mdf',  
+MOVE N'Orphans_log' 
+TO N'C:\Program Files\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Orphans_log.ldf',  
+NOUNLOAD,  STATS = 5
+
+GO
+
+
+--STEP 7. 
+--RUN THIS ON SERVER2
+--RUN THIS ON SERVER2
+
+--FIND SPECIFICALLY SANDY'S SID
+
+USE ORPHANS
+GO
+
+Select LOGINNAME, SID--<< FIND LOGINS SID FOR (SANDY)
+from sys.syslogins WHERE loginname = 'SANDY'
+ORDER BY 1 DESC
+
+Select NAME,sid --<< FIND SID FOR SANDY
+from sys.sysusers WHERE NAME = 'SANDY'
+ORDER BY 1 DESC
+
+
+
+--To detect orphaned users in a given database, simply run the following. 
+
+USE Orphans
+GO
+
+EXEC sp_change_users_login 'report'
+
+--DESTINATION DATABASE
+
+
+USE MASTER
+GO 
+SELECT name as SQL_LogIn,SID as SQL_SID FROM sys.syslogins
+WHERE [name] = 'sandy'
+GO
+
+USE Orphans
+GO 
+SELECT name DataBase_User,SID as Database_SID FROM sysusers
+WHERE [name] = 'sandy'
+GO
+
+-----------------------------------------------------------------------------------
+---------------------------------------------------------------
+
+
+
+--STEP 7. EXECUTE RESTORE
+
+USE [master]
+go
+
+RESTORE DATABASE [Orphans] 
+FROM  DISK = N'\\SERVER2\D\ORPHANS.BAK' WITH  FILE = 1, 
+MOVE N'Orphans' 
+TO N'C:\Program Files\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Orphans.mdf',  
+MOVE N'Orphans_log' 
+TO N'C:\Program Files\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Orphans_log.ldf',  
+NOUNLOAD,
+REPLACE,  
+STATS = 5
+GO
+
+--STEP 8 RERUN THE SCRIPTSS
+--NOTICE THAT THE DATABASE USER SID IS MISSING EVEN THOUGH THE DATABASE HAS BEEN MOVED AND SHE WAS PART OF THE SOURCE DATABASE (ORPHANS)
+
+--WE HAVE ORPHANED THIS SQL LOGIN
+
+USE ORPHANS
+GO
+
+Select LOGINNAME, DBNAME, SID--<< FIND LOGINS SID FOR (SANDY)
+from sys.syslogins WHERE loginname = 'SANDY'
+ORDER BY 1 DESC
+
+Select NAME,sid --<< FIND SID FOR SANDY
+from sys.sysusers WHERE NAME = 'SANDY'
+ORDER BY 1 DESC
+
+--STEP 9. 
+--CREATE AND CORRECT THE MISSING SID FOR LOGIN SANDY (ON SERVER2)
+
+USE [master]
+GO
+
+CREATE LOGIN [SANDY] 
+WITH PASSWORD=N'password123', 
+DEFAULT_DATABASE=[master], 
+CHECK_EXPIRATION=OFF, 
+CHECK_POLICY=OFF
+GO
+
+--CHECK
+USE ORPHANS
+GO
+
+Select LOGINNAME, DBNAME, SID--<< FIND LOGINS SID FOR (SANDY)
+from sys.syslogins WHERE loginname = 'SANDY'
+ORDER BY 1 DESC
+
+Select NAME,sid --<< FIND SID FOR SANDY
+from sys.sysusers WHERE NAME = 'SANDY'
+ORDER BY 1 DESC
+
+
+--STEP 10 
+--To resolve an orphaned user, resync the SID of the user to map to the login
+
+
+USE Orphans
+GO
+EXEC sp_change_users_login 'update_one', 'SANDY', 'SANDY'
+
+--STEP 11. VERIFY
+
+USE ORPHANS
+GO
+
+Select LOGINNAME, DBNAME, SID--<< FIND LOGINS SID FOR (SANDY)
+from sys.syslogins WHERE loginname = 'SANDY'
+ORDER BY 1 DESC
+
+Select NAME,sid --<< FIND SID FOR SANDY
+from sys.sysusers WHERE NAME = 'SANDY'
+ORDER BY 1 DESC
+
+
+
+
+
+
+
+-- Great script by Microsoft
+USE master
+GO
+IF OBJECT_ID ('sp_hexadecimal') IS NOT NULL
+  DROP PROCEDURE sp_hexadecimal
+GO
+CREATE PROCEDURE sp_hexadecimal
+    @binvalue varbinary(256),
+    @hexvalue varchar (514) OUTPUT
+AS
+DECLARE @charvalue varchar (514)
+DECLARE @i int
+DECLARE @length int
+DECLARE @hexstring char(16)
+SELECT @charvalue = '0x'
+SELECT @i = 1
+SELECT @length = DATALENGTH (@binvalue)
+SELECT @hexstring = '0123456789ABCDEF'
+WHILE (@i <= @length)
+BEGIN
+  DECLARE @tempint int
+  DECLARE @firstint int
+  DECLARE @secondint int
+  SELECT @tempint = CONVERT(int, SUBSTRING(@binvalue,@i,1))
+  SELECT @firstint = FLOOR(@tempint/16)
+  SELECT @secondint = @tempint - (@firstint*16)
+  SELECT @charvalue = @charvalue +
+    SUBSTRING(@hexstring, @firstint+1, 1) +
+    SUBSTRING(@hexstring, @secondint+1, 1)
+  SELECT @i = @i + 1
+END
+
+SELECT @hexvalue = @charvalue
+GO
+ 
+IF OBJECT_ID ('sp_help_revlogin') IS NOT NULL
+  DROP PROCEDURE sp_help_revlogin
+GO
+CREATE PROCEDURE sp_help_revlogin @login_name sysname = NULL AS
+DECLARE @name sysname
+DECLARE @type varchar (1)
+DECLARE @hasaccess int
+DECLARE @denylogin int
+DECLARE @is_disabled int
+DECLARE @PWD_varbinary  varbinary (256)
+DECLARE @PWD_string  varchar (514)
+DECLARE @SID_varbinary varbinary (85)
+DECLARE @SID_string varchar (514)
+DECLARE @tmpstr  varchar (1024)
+DECLARE @is_policy_checked varchar (3)
+DECLARE @is_expiration_checked varchar (3)
+
+DECLARE @defaultdb sysname
+ 
+IF (@login_name IS NULL)
+  DECLARE login_curs CURSOR FOR
+
+      SELECT p.sid, p.name, p.type, p.is_disabled, p.default_database_name, l.hasaccess, l.denylogin FROM 
+sys.server_principals p LEFT JOIN sys.syslogins l
+      ON ( l.name = p.name ) WHERE p.type IN ( 'S', 'G', 'U' ) AND p.name <> 'sa'
+ELSE
+  DECLARE login_curs CURSOR FOR
+
+
+      SELECT p.sid, p.name, p.type, p.is_disabled, p.default_database_name, l.hasaccess, l.denylogin FROM 
+sys.server_principals p LEFT JOIN sys.syslogins l
+      ON ( l.name = p.name ) WHERE p.type IN ( 'S', 'G', 'U' ) AND p.name = @login_name
+OPEN login_curs
+
+FETCH NEXT FROM login_curs INTO @SID_varbinary, @name, @type, @is_disabled, @defaultdb, @hasaccess, @denylogin
+IF (@@fetch_status = -1)
+BEGIN
+  PRINT 'No login(s) found.'
+  CLOSE login_curs
+  DEALLOCATE login_curs
+  RETURN -1
+END
+SET @tmpstr = '/* sp_help_revlogin script '
+PRINT @tmpstr
+SET @tmpstr = '** Generated ' + CONVERT (varchar, GETDATE()) + ' on ' + @@SERVERNAME + ' */'
+PRINT @tmpstr
+PRINT ''
+WHILE (@@fetch_status <> -1)
+BEGIN
+  IF (@@fetch_status <> -2)
+  BEGIN
+    PRINT ''
+    SET @tmpstr = '-- Login: ' + @name
+    PRINT @tmpstr
+    IF (@type IN ( 'G', 'U'))
+    BEGIN -- NT authenticated account/group
+
+      SET @tmpstr = 'CREATE LOGIN ' + QUOTENAME( @name ) + ' FROM WINDOWS WITH DEFAULT_DATABASE = [' + @defaultdb + ']'
+    END
+    ELSE BEGIN -- SQL Server authentication
+        -- obtain password and sid
+            SET @PWD_varbinary = CAST( LOGINPROPERTY( @name, 'PasswordHash' ) AS varbinary (256) )
+        EXEC sp_hexadecimal @PWD_varbinary, @PWD_string OUT
+        EXEC sp_hexadecimal @SID_varbinary,@SID_string OUT
+ 
+        -- obtain password policy state
+        SELECT @is_policy_checked = CASE is_policy_checked WHEN 1 THEN 'ON' WHEN 0 THEN 'OFF' ELSE NULL END FROM sys.sql_logins WHERE name = @name
+        SELECT @is_expiration_checked = CASE is_expiration_checked WHEN 1 THEN 'ON' WHEN 0 THEN 'OFF' ELSE NULL END FROM sys.sql_logins WHERE name = @name
+ 
+            SET @tmpstr = 'CREATE LOGIN ' + QUOTENAME( @name ) + ' WITH PASSWORD = ' + @PWD_string + ' HASHED, SID = ' + @SID_string + ', DEFAULT_DATABASE = [' + @defaultdb + ']'
+
+        IF ( @is_policy_checked IS NOT NULL )
+        BEGIN
+          SET @tmpstr = @tmpstr + ', CHECK_POLICY = ' + @is_policy_checked
+        END
+        IF ( @is_expiration_checked IS NOT NULL )
+        BEGIN
+          SET @tmpstr = @tmpstr + ', CHECK_EXPIRATION = ' + @is_expiration_checked
+        END
+    END
+    IF (@denylogin = 1)
+    BEGIN -- login is denied access
+      SET @tmpstr = @tmpstr + '; DENY CONNECT SQL TO ' + QUOTENAME( @name )
+    END
+    ELSE IF (@hasaccess = 0)
+    BEGIN -- login exists but does not have access
+      SET @tmpstr = @tmpstr + '; REVOKE CONNECT SQL TO ' + QUOTENAME( @name )
+    END
+    IF (@is_disabled = 1)
+    BEGIN -- login is disabled
+      SET @tmpstr = @tmpstr + '; ALTER LOGIN ' + QUOTENAME( @name ) + ' DISABLE'
+    END
+    PRINT @tmpstr
+  END
+
+  FETCH NEXT FROM login_curs INTO @SID_varbinary, @name, @type, @is_disabled, @defaultdb, @hasaccess, @denylogin
+   END
+CLOSE login_curs
+DEALLOCATE login_curs
+RETURN 0
+GO
+
+
+exec sp_help_revlogin
+
+
+
+
+
+Exec sp_change_users_login ‘autofix’, ‘tom’
+
+Select * from sys.syslogins
+Select * from sys.sysusers
+
+
+
+--drop database orphans
+
+--STEP 1. CREATE A DATABASE AND TABLE, POPULATE TABLE
+
+--Create a database 
+
+Use master
+go
+
+
+CREATE DATABASE [Orphans]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'Orphans', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\Orphans.mdf', 
+SIZE = 8192KB , 
+FILEGROWTH = 65536KB )
+
+ LOG ON 
+( NAME = N'Orphans_log', 
+FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL13.MSSQLSERVER\MSSQL\DATA\Orphans_log.ldf', 
+SIZE = 8192KB , 
+FILEGROWTH = 65536KB )
+GO
+
+--create table cars
+
+USE [Orphans]
+GO
+
+CREATE TABLE [dbo].[Cars](
+[cars] [varchar](50) NULL
+) ON [PRIMARY]
+GO
+
+
+--Insert data into table cars
+
+USE [Orphans]
+GO
+
+insert into Cars values('Rolls Royce'),('Benz'),('Bently'),('Porche'),('Jag')
+
+select * from Cars
+
+--STEP 2. FIRST CREATE A WINDOWS DOMAIN USER 'TOM' IN ACTIVE DIRECTORY THEN CREATE SQL LOGIN AND MAP THE LOGIN TO ORPHANS DATABASE AS AN USER
+
+
+--TOM
+
+USE [master]
+GO
+
+CREATE LOGIN [SQL\tom] FROM WINDOWS WITH DEFAULT_DATABASE=[master] --<< CREATE SQL LOGIN
+GO
+
+USE [Orphans]
+GO
+
+CREATE USER [SQL\tom] FOR LOGIN [SQL\tom] --<< CREATE SQL USER TOM 
+GO
+
+USE [Orphans]
+GO
+
+ALTER ROLE [db_datareader] ADD MEMBER [SQL\tom] --<< ADD SQL LOGIN TOM TO DB_DATABASE ROLE (GROUP)
+GO
+
+
+--STEP 3. CREATE A SQL LOGIN SANDY
+
+USE [master]
+GO
+
+CREATE LOGIN [SANDY] 
+WITH PASSWORD=N'password123', 
+DEFAULT_DATABASE=[master], 
+CHECK_EXPIRATION=OFF, 
+CHECK_POLICY=OFF
+GO
+
+--STEP 4. FIND ALL THE USERS AND LOGINS IN DATABASE (RUN ON SERVER1 THEN ON SERVER 2)
+
+Select LOGINNAME, DBNAME, SID --<< FIND ALL LOGINS  (TOM AND BILLY)
+from sys.syslogins 
+ORDER BY 1 DESC
+
+Select NAME,sid --<< FIND ALL USERS
+from sys.sysusers 
+ORDER BY 1 DESC
+
+
+--5. CREATE AND MAP SANDY SQL LOGIN TO DATABASE ORPHAN
+
+USE [Orphans]
+GO
+CREATE USER [SANDY] FOR LOGIN [SANDY]
+GO
+
+--FIND SPECIFICALLY SANDY'S SID
+
+Select LOGINNAME, DBNAME, SID--<< FIND LOGINS SID FOR (SANDY)
+from sys.syslogins WHERE loginname = 'SANDY'
+ORDER BY 1 DESC
+
+Select NAME,sid --<< FIND SID FOR SANDY
+from sys.sysusers WHERE NAME = 'SANDY'
+ORDER BY 1 DESC
+
+--NOTICE BOTH THE SIDS ARE THE SAME
+
+--STEP 6. MOVE DATABASE ORPHANS FROM SERVER1 TO SERVER2 USING BACKUP AND RESTORE
+
+BACKUP DATABASE [Orphans] 
+TO  DISK = N'C:\s\ORPHANS.BAK' 
+WITH NOFORMAT, 
+NOINIT,  
+NAME = N'Orphans-Full Database Backup', 
+SKIP, 
+NOREWIND, 
+NOUNLOAD,  
+STATS = 10
+GO
+
+
+--STEP 6. COPY PASTE THE BACKUP AND RESTORE ON SERVER2 AND NOTICE WHICH SQL LOGINS AND USERS MOVED WITH THE DATABASE 
+
+--STEP 7.
+--(RUN RESTORE ON SERVER2)
+--(RUN RESTORE ON SERVER2)
+
+
+USE [master]
+
+RESTORE DATABASE [Orphans] 
+FROM  DISK = N'\\SERVER2\D\ORPHANS.BAK' WITH  FILE = 1, 
+MOVE N'Orphans' 
+TO N'C:\Program Files\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Orphans.mdf',  
+MOVE N'Orphans_log' 
+TO N'C:\Program Files\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Orphans_log.ldf',  
+NOUNLOAD,
+REPLACE,  
+STATS = 5
+GO
+
+--STEP 7. 
+--RUN THIS ON SERVER2
+--RUN THIS ON SERVER2
+
+--FIND SPECIFICALLY SANDY'S SID
+
+USE ORPHANS
+GO
+
+Select LOGINNAME, DBNAME, SID--<< FIND LOGINS SID FOR (SANDY)
+from sys.syslogins WHERE loginname = 'SANDY'
+ORDER BY 1 DESC
+
+Select NAME,sid --<< FIND SID FOR SANDY
+from sys.sysusers WHERE NAME = 'SANDY'
+ORDER BY 1 DESC
+
+
+
+--To detect orphaned users in a given database, simply run the following. 
+
+USE Orphans
+GO
+
+EXEC sp_change_users_login 'report'
+
+--DESTINATION DATABASE
+
+
+USE MASTER
+GO 
+SELECT name as SQL_LogIn,SID as SQL_SID FROM sys.syslogins
+WHERE [name] = 'sandy'
+GO
+
+USE Orphans
+GO 
+SELECT name DataBase_User,SID as Database_SID FROM sysusers
+WHERE [name] = 'sandy'
+GO
+
+
+
+
+--STEP 7. EXECUTE RESTORE
+
+USE [master]
+
+RESTORE DATABASE [Orphans] 
+FROM  DISK = N'\\SERVER2\D\ORPHANS.BAK' WITH  FILE = 1, 
+MOVE N'Orphans' 
+TO N'C:\Program Files\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Orphans.mdf',  
+MOVE N'Orphans_log' 
+TO N'C:\Program Files\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\Orphans_log.ldf',  
+NOUNLOAD,
+REPLACE,  
+STATS = 5
+GO
+
+--STEP 8 RERUN THE SCRIPTSS
+--NOTICE THAT THE DATABASE USER SID IS MISSING EVEN THOUGH THE DATABASE HAS BEEN MOVED AND SHE WAS PART OF THE SOURCE DATABASE (ORPHANS)
+
+--WE HAVE ORPHANED THIS SQL LOGIN
+
+USE ORPHANS
+GO
+
+Select LOGINNAME, DBNAME, SID--<< FIND LOGINS SID FOR (SANDY)
+from sys.syslogins WHERE loginname = 'SANDY'
+ORDER BY 1 DESC
+
+Select NAME,sid --<< FIND SID FOR SANDY
+from sys.sysusers WHERE NAME = 'SANDY'
+ORDER BY 1 DESC
+
+--STEP 9. 
+--CREATE AND CORRECT THE MISSING SID FOR LOGIN SANDY (ON SERVER2)
+
+USE [master]
+GO
+
+CREATE LOGIN [SANDY] 
+WITH PASSWORD=N'password123', 
+DEFAULT_DATABASE=[master], 
+CHECK_EXPIRATION=OFF, 
+CHECK_POLICY=OFF
+GO
+
+--CHECK
+USE ORPHANS
+GO
+
+Select LOGINNAME, DBNAME, SID--<< FIND LOGINS SID FOR (SANDY)
+from sys.syslogins WHERE loginname = 'SANDY'
+ORDER BY 1 DESC
+
+Select NAME,sid --<< FIND SID FOR SANDY
+from sys.sysusers WHERE NAME = 'SANDY'
+ORDER BY 1 DESC
+
+
+--STEP 10 
+--To resolve an orphaned user, resync the SID of the user to map to the login
+
+
+USE Orphans
+GO
+EXEC sp_change_users_login 'update_one', 'SANDY', 'SANDY'
+
+--STEP 11. VERIFY
+
+USE ORPHANS
+GO
+
+Select LOGINNAME, DBNAME, SID--<< FIND LOGINS SID FOR (SANDY)
+from sys.syslogins WHERE loginname = 'SANDY'
+ORDER BY 1 DESC
+
+Select NAME,sid --<< FIND SID FOR SANDY
+from sys.sysusers WHERE NAME = 'SANDY'
+ORDER BY 1 DESC
+
+
+
+----------------------------------------------------------------------------
+
+
+Monitoring Log Shipping 
+
+
+There are several methods for monitoring log shipping and they are as follows:
+•	SQL Server Reports
+•	Stored procedures
+•	Tables in MSDB database
+•	SQL Server Error Log 
+
+SQL Server Reports (GUI)
+To view reports via the SSMS, right click the server – reports – standard reports – Log shipping Status
+
+
+Stored procedures (Run on Primary server)
+--EXECUTE ON PRIMARY
+
+Use master
+Go
+sp_help_log_shipping_monitor
+
+Use master
+Go
+sp_help_log_shipping_monitor_primary
+@primary_server =  'server1', --<<  PROVIDE THE PARAMETER SERVER NAME
+@primary_database = 'test'    --<<  PROVIDE THE PARAMETER DATABASE NAME
+
+
+SELECT * 
+FROM msdb.dbo.sysjobs 
+WHERE category_id = 6
+
+SELECT * 
+FROM [msdb].[dbo].[sysjobhistory]
+WHERE [message] like '%Operating system error%'
+
+SELECT * 
+FROM [msdb].[dbo].[log_shipping_monitor_error_detail]
+WHERE [message] like '%Operating system error%'
+
+
+EXEC xp_readerrorlog 0,1,"Backup", Null
+
+
+Stored procedures (Run on Secondary server)
+
+
+--run on secondary server
+
+Use master
+Go
+sp_help_log_shipping_monitor
+
+Use master
+Go
+sp_help_log_shipping_monitor_secondary
+@secondary_server =  'server2',
+@secondary_database =  'test'
+
+
+SELECT * 
+FROM msdb.dbo.sysjobs 
+WHERE category_id = 6
+
+SELECT * 
+FROM [msdb].[dbo].[sysjobhistory]
+WHERE [message] like '%Operating system error%'
+
+SELECT * 
+FROM [msdb].[dbo].[log_shipping_monitor_error_detail]
+WHERE [message] like '%Operating system error%'
+
+EXEC xp_readerrorlog 0,1,"Restore",Null
+
+
+
+
+Tables in MSDB database
+
+SELECT * 
+FROM msdb.dbo.sysjobs 
+WHERE category_id = 6
+
+SELECT * 
+FROM [msdb].[dbo].[sysjobhistory]
+WHERE [message] like '%Operating system error%'
+
+SELECT * 
+FROM [msdb].[dbo].[log_shipping_monitor_error_detail]
+WHERE [message] like '%Operating system error%'
+
+
+
+
+
+SQL Server Error Log
+
+
+Select * from sys.sysmessages 
+Where description like '%shipping%' 
+
+
+--Can execute on both servers
+
+EXEC xp_readerrorlog 0,1,"Error",Null
+
+EXEC xp_readerrorlog 0,1,"Shipping",Null
+
+-- execute on Primary server
+
+EXEC xp_readerrorlog 0,1,"Backup",Null
+
+-- execute on secondary servers
+
+EXEC xp_readerrorlog 0,1,"Restore",Null
+
+
+
+
+
+
+
+----------------------------------------------------------------------------
+
+
+What is database mirroring?
+
+Database mirroring is process having a redundant copy of a single database at another location to ensure continuous data availability in case of a disaster on the principal database.
+Database mirroring ensures that one viable copy of a database will always remain accessible during disaster recovery or down time needed for the principal server
+The principal server is the source server and the mirror is the destination server 
+There are two types of operation modes when using database mirroring:
+Synchronous operation mode:
+This is used when very real time accuracy is required; which means that the system must immediately copy every change in the principal's content to the mirror and vice-versa (this is referred to as a hot standby) '
+Asynchronous operation mode:
+This is used when the content is not fully synchronized, and thus may result in some data loss (this is referred to as a warm standby)
+Advantages:
+•	Relatively easy to set up
+•	Database mirroring is an automatic failover process
+•	All application connection can be redirected automatically with proper configuration
+•	There will not be data transfer latency (synchronous mode)
+
+Disadvantages:
+
+•	Can only have one to one relationship with principal and mirror 
+•	Cannot be used for reporting solution (mirror in restoring state)
+•	Mirroring supports only Full Recovery (not bulk or simple mode)
+
+
+
+
+
+
+
+
+
+
+
+
+
+sql script for database mirroring
+
+
+--1 primary
+
+alter database mirror
+set recovery full
+go
+
+
+--2 primary
+backup database mirror
+to disk = 'c:\s\full.bak'
+go
+
+
+
+
+--4 primary
+
+backup log mirror
+to disk = 'c:\s\tlog.trn'
+go
+
+
+
+--6 primary
+
+create endpoint endpoint_principal
+state = started
+as tcp (listener_port = 5022)
+for database_mirroring (role = partner)
+go
+
+
+
+
+--9 primary
+
+alter database mirror
+set partner = 'tcp://server1:5022'
+go
+
+
+
+--3 mirror
+
+USE [master]
+RESTORE DATABASE [mirror] 
+FROM  DISK = N'C:\d\full.bak' 
+WITH  FILE = 1,  
+MOVE N'mirror' 
+TO N'C:\Program Files\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\mirror.mdf',  
+MOVE N'mirror_log' 
+TO N'C:\Program Files\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\mirror_log.ldf',  
+NORECOVERY,  
+NOUNLOAD,  
+STATS = 5
+GO
+
+
+
+--5 mirror
+
+RESTORE LOG [mirror] 
+FROM  DISK = N'C:\d\tlog.trn' 
+WITH  FILE = 1,  
+NORECOVERY,  
+NOUNLOAD,  
+STATS = 10
+GO
+
+
+
+--7 mirror
+
+create endpoint endpoint_mirror
+state = started
+as tcp (listener_port = 5023)
+for database_mirroring (role = partner)
+go
+
+--8 mirror
+
+alter database mirror
+set partner = 'tcp://server2:5023'
+go
+
+
+
+*********************************************
+
+--ENABLE SQLCMD MODE TO SWITCH BETWEEN DIFFERENT SQL SERVERS WTIH A A QUERY PANE
+--QUERY - SQLMCMD MODE 
+
+--:CONNECT SQLSERVER1
+--Or for a non-default instance 
+--:CONNECT DESKTOP-QMOOH4U\DEV
+
+
+--DROP DATABASE MIRROR
+
+USE MASTER
+GO
+
+CREATE DATABASE MIRROR
+GO
+
+USE MIRROR
+GO
+
+CREATE TABLE CHOCOLATES
+(NAME VARCHAR (25))
+
+INSERT INTO CHOCOLATES
+VALUES ('GODIVA'),('MARS'),('HERSHYS'),('DOVE'),('KITKAT')
+
+SELECT * FROM CHOCOLATES
+
+
+BACKUP DATABASE [MIRROR] TO  DISK = N'C:\Mirror\CHOC.BAK' WITH iNIT
+
+BACKUP LOG [MIRROR] TO  DISK = N'C:\Mirror\CHOC.TRN' WITH iNIT
+
+USE [master]
+GO
+
+--CHANGE CONNECTIONS TO DEV SERVER: THEN RUN
+
+:CONNECT DESKTOP-QMOOH4U\DEV
+
+RESTORE DATABASE [MIRROR] 
+FROM  DISK = N'C:\Mirror\CHOC.BAK' 
+WITH  FILE = 1,  
+MOVE N'MIRROR' 
+TO N'C:\Program Files\Microsoft SQL Server\MSSQL12.DEV\MSSQL\DATA\MIRROR.mdf',  
+MOVE N'MIRROR_log' 
+TO N'C:\Program Files\Microsoft SQL Server\MSSQL12.DEV\MSSQL\DATA\MIRROR_log.ldf',  
+NORECOVERY
+GO
+
+RESTORE LOG [MIRROR] 
+FROM  DISK = N'C:\Mirror\CHOC.TRN' 
+WITH  FILE = 1,  
+NORECOVERY
+GO
+
+
+--GO TO SECURITY - LOGINS - (RC) [NT AUTHORITY\SYSTEM] - PROPERTIES - SERVERROLE (SYSADMIN) - SELECT DB FOR DBM - DB OWNER
+
+--CHANGE CONNECTIONS TO DEV SERVER: THEN RUN
+
+:CONNECT DESKTOP-QMOOH4U\DEV
+
+INSERT INTO CHOCOLATES
+VALUES ('OH HENRY'),('ALMOND JOY')
+
+SELECT * FROM CHOCOLATES
+
+ALTER DATABASE MIRROR SET PARTNER OFF
+DROP DATABASE MIRROR
+
+USE MASTER
+GO
+
+CREATE DATABASE MIRROR
+GO
+
+USE MIRROR
+GO
+
+CREATE TABLE CHOCOLATES
+(NAME VARCHAR (25))
+
+INSERT INTO CHOCOLATES
+VALUES ('GODIVA'),('MARS'),('HERSHYS'),('DOVE'),('KITKAT')
+
+SELECT * FROM CHOCOLATES
+
+--1 primary
+
+alter database mirror
+set recovery full
+go
+
+
+--2 primary
+backup database mirror
+to disk = 'c:\s\full.bak'
+go
+
+
+
+
+--4 primary
+
+backup log mirror
+to disk = 'c:\s\tlog.trn'
+go
+
+
+
+--6 primary
+
+create endpoint endpoint_principal
+state = started
+as tcp (listener_port = 5022)
+for database_mirroring (role = partner)
+go
+
+
+
+
+--9 primary
+
+alter database mirror
+set partner = 'tcp://server1:5022'
+go
+
+
+
+
+--SQL SCRIPTS FOR MONITORING AND INVESTIGATING  DATABASE MIRRORING:
+
+--INFORMATION ABOUT DATABASE MIRRORING
+
+select DB_NAME(database_id) dbname,mirroring_state_desc,mirroring_role_desc,
+mirroring_safety_level_desc,mirroring_safety_sequence
+mirroring_partner_name,mirroring_partner_instance,
+mirroring_witness_state,mirroring_witness_state_desc,
+mirroring_failover_lsn,mirroring_connection_timeout,mirroring_redo_queue,
+mirroring_end_of_log_lsn,mirroring_replication_lsn,*
+from master.sys.database_mirroring
+where mirroring_state is not null
+
+
+--INFORMATION ABOUT DATABASE MIRRORING CONNECTIONS
+
+select state_desc,connect_time,login_time,authentication_method,principal_name,
+remote_user_name,last_activity_time,is_accept,login_state_desc,
+receives_posted,sends_posted,total_bytes_sent,total_bytes_received,
+total_sends,total_receives,*
+from sys.dm_db_mirroring_connections
+
+--INFORMATION ABOUT DATABASE MIRRORING ENDPOINTS
+
+select name,endpoint_id,protocol_desc,type_desc,state_desc,role_desc,
+connection_auth_desc,*
+from sys.database_mirroring_endpoints
+
+--SCRIPT TO INDICATE WHICH DATABASE HAS BEEN MIRRORED:
+
+SELECT DB_NAME(database_id) AS mirrored
+FROM master.sys.database_mirroring 
+WHERE 1=1
+AND mirroring_guid IS NOT NULL
+ORDER BY DB_NAME(database_id);
+
+
+--SCRIPT TO INDICATE WHICH DATABASE IS IN SYNC MODE
+
+SELECT DB_NAME(database_id) AS synchronous_mode
+FROM master.sys.database_mirroring 
+WHERE 1=1
+AND mirroring_guid IS NOT NULL
+--AND mirroring_role_desc = 'PRINCIPAL'
+--AND mirroring_role_desc = 'MIRROR'
+AND mirroring_safety_level_desc = 'FULL'
+ORDER BY DB_NAME(database_id);
+
+--SCRIPT TO INDICATE WHICH DATABASE IS IN ASYNC MODE
+
+SELECT DB_NAME(database_id) AS asynchronous_mode
+FROM master.sys.database_mirroring 
+WHERE 1=1
+AND mirroring_guid IS NOT NULL
+--AND mirroring_role_desc = 'PRINCIPAL'
+--AND mirroring_role_desc = 'MIRROR'
+AND mirroring_safety_level_desc = 'OFF'
+ORDER BY DB_NAME(database_id);
+
+--SCRIPT TO INDICATE WHICH DATABASE HAS FULLT SYNCHRONIZED OR NOT
+
+SELECT 
+ DB_NAME(database_id) AS fully_synchronized
+FROM master.sys.database_mirroring 
+WHERE 1=1
+AND mirroring_guid IS NOT NULL
+--AND mirroring_role_desc = 'PRINCIPAL'
+--AND mirroring_role_desc = 'MIRROR'
+AND mirroring_state_desc = 'SYNCHRONIZED' 
+ORDER BY DB_NAME(database_id);
+
+
+--SETTING THE ASYNCHRONOUS MODE OFF AND ON
+ 
+
+SELECT 
+  'ALTER DATABASE [' + DB_NAME(database_id) + '] SET PARTNER SAFETY OFF;'
++ ' PRINT ''[' +  DB_NAME(database_id) + '] has been set to asynchronous mirroring mode.'';'
+  AS command_to_set_mirrored_database_to_use_synchronous_mirroring_mode
+FROM master.sys.database_mirroring 
+WHERE 1=1
+AND mirroring_guid IS NOT NULL
+AND mirroring_role_desc = 'PRINCIPAL'
+AND mirroring_safety_level_desc = 'FULL'
+ORDER BY DB_NAME(database_id);
+
+
+ SELECT 
+  'ALTER DATABASE [' + DB_NAME(database_id) + '] SET PARTNER SAFETY FULL;'
++ ' PRINT ''[' +  DB_NAME(database_id) + '] has been set to synchronous mirroring mode.'';'
+  AS command_to_set_mirrored_database_to_use_synchronous_mirroring_mode
+FROM master.sys.database_mirroring 
+WHERE 1=1
+AND mirroring_guid IS NOT NULL
+AND mirroring_role_desc = 'PRINCIPAL'
+AND mirroring_safety_level_desc = 'OFF'
+ORDER BY DB_NAME(database_id);
+
+ --TO SUSPEND THE DATABASE MIRRORING
+
+ SELECT 
+ 'ALTER DATABASE [' + DB_NAME( database_id ) + '] SET PARTNER SUSPEND;'
++ ' PRINT ''[' +  DB_NAME(database_id) + '] has had mirroring paused.'';' 
+  AS command_to_pause_mirroring_for_the_mirrored_database 
+FROM master.sys.database_mirroring 
+WHERE 1=1
+AND mirroring_guid IS NOT NULL
+AND mirroring_role_desc = 'PRINCIPAL'
+AND mirroring_state_desc <> 'SUSPENDED'
+ORDER BY DB_NAME(database_id);
+
+ --TO RESUME THE DATABASE MIRRORING 
+
+SELECT 
+ 'ALTER DATABASE [' + DB_NAME( database_id ) + '] SET PARTNER RESUME;'
++ ' PRINT ''[' +  DB_NAME(database_id) + '] has had mirroring resumed.'';' 
+  AS command_to_resume_mirroring_for_the_mirrored_database 
+FROM master.sys.database_mirroring 
+WHERE 1=1
+AND mirroring_guid IS NOT NULL
+AND mirroring_role_desc = 'PRINCIPAL'
+AND mirroring_state_desc = 'SUSPENDED'
+ORDER BY DB_NAME(database_id);
+
+
+--SETTING TO FAILOVER DATABASE MIRRORING
+ 
+
+SELECT 
+ 'ALTER DATABASE [' + DB_NAME(database_id) + '] SET PARTNER FAILOVER;'
++ ' PRINT ''[' +  DB_NAME(database_id) + '] has been been manually failed over.'';' 
+  AS command_to_manually_failover_the_mirrored_database
+FROM master.sys.database_mirroring 
+WHERE 1=1
+AND mirroring_guid IS NOT NULL
+AND mirroring_role_desc = 'PRINCIPAL'
+AND mirroring_safety_level_desc = 'FULL'
+AND mirroring_state_desc = 'SYNCHRONIZED'
+ORDER BY DB_NAME(database_id);
+
+
+-- HISTORY OF RESULTS
+
+Exec msdb..sp_dbmmonitorresults 'db',1,0
+
+
+--use on mirror db to stop miroring and drop db
+alter database mirror set partner off
+restore database mirror
+drop database MIRROR
+
+
+----------------------------------------------------------------------------
+
+What is replication?
+
+Replication is a set of technologies for copying and distributing data and database objects from one database to another and then synchronizing between databases to maintain consistency. Using replication, you can distribute data to different locations. Unlike other methods of high availability, it doesn’t distribute entire database, but only distributes some part of database like tables, views or stored procedures
+
+There are four types of replication
+•	Transactional replication
+•	Peer to peer replication
+•	Snapshot replication
+•	Merge replication
+
+•	Transactional replication 
+•	It replicates each transaction for the article being published
+•	When a transaction is written to the transaction log, the Log Reader Agent reads it from the transaction log and writes it to the distribution database and then to the subscriber 
+•	Only committed transactions are replicated to ensure data consistency
+•	Transactional replication is widely applied where high latency is not allowed, such as an OLTP system for a bank or a stock trading firm, because you always need real-time updates of cash or stocks
+
+•	Log Reader Agent 
+•	The Log Reader Agent is used with transactional replication. It moves transactions marked for replication from the transaction log on the Publisher to the distribution database. 
+•	Each database published using transactional replication has its own Log Reader Agent that runs on the Distributor 
+•	Push or Pull
+•	Push - a push subscription pushes data from publisher to the subscriber
+•	Pull - a pull subscription requests changes from the Publisher.  This allows the subscriber to pull data as needed.  This is useful for disconnected machines such as notebook computers that are not always connected
+
+
+•	Distribution Agent 
+•	The Distribution Agent is used with snapshot replication and transactional replication. 
+•	It applies the initial snapshot to the Subscriber and moves transactions held in the distribution database to Subscribers. 
+•	The Distribution Agent runs at either the Distributor for push subscriptions or at the Subscriber for pull subscriptions
+
+
+
+What is Peer-to-Peer Transactional Replication?
+
+•	Peer to Peer replication is the process of having multiple servers that act as both publisher and subscriber with its own distributor. As such, when you update, insert or delete records, they are synchronized in real time with each other.  The topology (architecture) of the design involves a master server from which other servers connect to the master database.  
+•	These server are referred to as nodes.
+•	If any one of the locations is down, the other locations can still stay synchronized, because each node acts as a publisher and a subscriber. 
+•	Backup and restore database to each server in replication is needed
+•	Enable distributor in each server that is in replication
+
+https://technet.microsoft.com/en-us/library/ms151196%28v=sql.110%29.aspx
+
+--sp_removedbreplication
+use master
+go
+
+create database PTP
+go
+
+
+use ptp
+go
+
+create table Computers
+(Computerid int primary key,
+Name varchar (20))
+
+use PTP
+go
+
+insert into Computers
+values (1,'Sony'),(2,'HP'),(3,'Dell'),(4,'Apple')
+
+select * from Computers
+
+use PTP
+go
+
+insert into Computers
+values (6,'Lenova')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+•	Snapshot replication:
+
+•	As the name suggests, a snapshot replication takes a snapshot of the published objects and applies it to a subscriber
+•	Primarily used for fairly static data such as data warehouse or when it’s acceptable to have data that does not need to by constantly synchronized
+•	A subscriber does not always need to be connected, so data marked for replication can be applied the next time the subscriber is connected
+•	list of items that only changes periodically as in data warehousing
+
+
+Replication agents 
+•	Snapshot Agent
+•	Used with all types of replication
+•	It prepares the schema of published tables and objects
+•	Stores the snapshot files
+•	Records information about synchronization in the distribution database
+•	Snapshot Agent runs at the Distributor
+
+•	Push or Pull
+•	Push - a push subscription pushes data from publisher to the subscriber
+•	Pull - a pull subscription requests changes from the Publisher.  This allows the subscriber to pull data as needed.  This is useful for disconnected machines such as notebook computers that are not always connected
+
+
+•	Distribution Agent 
+•	The Distribution Agent is used with snapshot replication and transactional replication. 
+•	It applies the initial snapshot to the Subscriber and moves transactions held in the distribution database to Subscribers. 
+•	The Distribution Agent runs at either the Distributor for push subscriptions or at the Subscriber for pull subscriptions
+
+
+•	Merge replication –
+
+•	This is the most complex types of replication which allows changes to happen at both the publisher and subscriber.  
+
+•	As the name implies, changes are merged to keep data consistency and a uniform set of data. 
+
+•	Just like transactional replication, an initial synchronization is done by applying snapshot. 
+
+•	When a transaction occurs at the Publisher or Subscriber, the change is written to change tracking tables. The Merge Agent checks these tracking tables and sends the transaction to the distribution database where it gets propagated.  
+
+•	The merge agent has the capability of resolving conflicts that occur during data synchronization.  
+
+•	An example of using merge replication can be a store with many branches where products may be centrally stored in inventory. 
+
+•	As the overall inventory is reduced it is propagated to the other stores to keep the databases synchronized. 
+Some applications also require that changes flow from the Subscriber back to the Publisher. merge replication provide options for these types of applications.
+•	Merge Agent - The Merge Agent is used with merge replication. It applies the initial snapshot to the Subscriber and moves and reconciles incremental data changes that occur. Each merge subscription has its own Merge Agent that connects to both the Publisher and the Subscriber and updates both. The Merge Agent runs at either the Distributor for push subscriptions or the Subscriber for pull subscriptions. 
+•	Queue Reader Agent - The Queue Reader Agent is used with transactional replication with the queued updating option. The agent runs at the Distributor and moves changes made at the Subscriber back to the Publisher. Unlike the Distribution Agent and the Merge Agent, only one instance of the Queue Reader Agent exists to service all Publishers and publications for a given distribution database. 
+DMV's and their use?    '
+•	sys.dm_repl_articles - Contains information about each article being published. It returns data from the database being published and returns a row for each object being published in each article. 
+•	sys.dm_repl_schemas - Contains information about each table and column being published. It returns data from the database being published and returns one row for each column in each object being published 
+•	sys.dm_repl_traninfo - Contains information about each transaction in a transactional replication 
+
+
+
+************************************************************
+
+create database foods
+go
+
+
+use foods
+go
+
+create table fruits
+(fruitsid int primary key, --<< primary key created for fruits table
+fruits varchar(20))
+
+insert into fruits (fruitsid,fruits)
+values (1,'apple'),(2,'plum'),(3,'orange'),(4,'bananas'),(5,'melon')
+
+select * from fruits
+
+use foods
+go
+
+create table veggies
+(                              --<< no primary key created for veggies
+veggies varchar(20))                   
+
+
+insert into veggies (veggies)
+values('tomato'),('carrot'),('onion'),('lettuce')
+
+select * from veggies
+
+--insert data into table and view the data
+
+use foods
+go
+
+select * from fruits
+
+insert into fruits (fruitsid,fruits)
+values (6,'strawberry')
+
+
+insert into fruits (fruitsid,fruits)
+values (9,'blueberry')
+
+--delete from fruits where fruitsid in (6,7)
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------------
+
 
 
 ----------------------------------------------------------------------------
