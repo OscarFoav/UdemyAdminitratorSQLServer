@@ -6663,7 +6663,7 @@ ORDER BY 1 DESC
 
 
 
--- Great script by Microsoft
+-- Great script by Microsoft copiar login entre instancias para evitar usuarios huerfanos
 USE master
 GO
 IF OBJECT_ID ('sp_hexadecimal') IS NOT NULL
@@ -7853,6 +7853,110 @@ values (9,'blueberry')
 
 
 ----------------------------------------------------------------------------
+
+--REGISTER ALL SERVERS FIRST
+
+--NOTE: DATABASE CREATED WITH FULL RECOVERY MODE
+
+CREATE DATABASE [Rep1]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'Rep1', 
+FILENAME = N'C:\AlwaysOn\Rep1.mdf' , 
+SIZE = 8192KB , 
+FILEGROWTH = 65536KB )
+
+ LOG ON 
+( NAME = N'Rep1_log', 
+FILENAME = N'C:\AlwaysOn\Rep1_log.ldf' , 
+SIZE = 8192KB , 
+FILEGROWTH = 65536KB )
+GO
+
+USE [master]
+GO
+ALTER DATABASE [Rep1] SET RECOVERY FULL WITH NO_WAIT
+GO
+
+--NOTE: DATABASE CREATED WITH SIMPLE RECOVERY MODE
+
+
+CREATE DATABASE [Rep2]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'Rep2', 
+FILENAME = N'C:\AlwaysOn\Rep2.mdf' , 
+SIZE = 8192KB , 
+FILEGROWTH = 65536KB )
+
+ LOG ON 
+( NAME = N'Rep1_log', 
+FILENAME = N'C:\AlwaysOn\Rep2_log.ldf' , 
+SIZE = 8192KB , 
+FILEGROWTH = 65536KB )
+GO
+
+USE [master]
+GO
+ALTER DATABASE [Rep2] SET RECOVERY SIMPLE WITH NO_WAIT
+GO
+
+--NOTE: DATABASE DOES NOT HAVE A FULL BACKUP
+
+CREATE DATABASE [Rep3]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'Rep3', 
+FILENAME = N'C:\AlwaysOn\Rep3.mdf' , 
+SIZE = 8192KB , 
+FILEGROWTH = 65536KB )
+
+ LOG ON 
+( NAME = N'Rep1_log', 
+FILENAME = N'C:\AlwaysOn\Rep3_log.ldf' , 
+SIZE = 8192KB , 
+FILEGROWTH = 65536KB )
+GO
+
+USE [master]
+GO
+ALTER DATABASE [Rep3] SET RECOVERY FULL WITH NO_WAIT
+GO
+
+
+--TAKE FULL BACKUPS OF REP1 AND REP2 SERVER BUT NOT REP3 SERVER TO A SHARED FOLDER!!!
+
+BACKUP DATABASE [Rep1] 
+TO  DISK = N'C:\AlwaysOn\Rep1.bak' 
+WITH NOFORMAT, INIT
+GO
+
+BACKUP DATABASE [Rep2] 
+TO  DISK = N'C:\AlwaysOn\Rep2.bak' 
+WITH NOFORMAT, INIT
+GO
+
+--POPULATE DATA FROM ADVENTUREWORKS DATABASE TO REP1,REP2,REP3 USING EXPORT WIAZRD
+
+
+--START THE ALWAYS ON SET UP 
+
+
+USE [master]
+GO
+
+DROP AVAILABILITY GROUP [123];
+
+GO
+
+
+restore database rep1
+
+restore database rep4
+
+drop database rep1
+drop database rep4
+
 
 
 
